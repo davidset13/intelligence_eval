@@ -1,0 +1,5 @@
+pip==25.1.1
+pandas==2.3.1
+fastparquet==2024.11.0
+pyarrow==20.0.0
+huggingface-hub==0.33.2

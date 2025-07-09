@@ -20,3 +20,10 @@
 3. Not a Good Business Idea
 
 * Make it open source and make it center of resume
+
+## Getting started (Windows)
+
+* `python -m venv .venv`
+* `.venv/Scripts/activate`
+* `python.exe -m pip install -r requirements.txt`
+
