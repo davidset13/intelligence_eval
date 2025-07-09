@@ -21,9 +21,11 @@
 
 * Make it open source and make it center of resume
 
-## Getting started (Windows)
+## Getting started (Windows Powershell)
 
+* `cd hle_server`
 * `python -m venv .venv`
 * `.venv/Scripts/activate`
 * `python.exe -m pip install -r requirements.txt`
-
+* `python src/get_hle_dataset.py`
+* The dataset should save to the `utility` folder.
