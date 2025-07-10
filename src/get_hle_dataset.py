@@ -12,7 +12,6 @@ for idx in image_series.index:
     extension = "jpg" if "jpeg" in header or "jpg" in header else "png"
     with open(os.path.join(os.getcwd(), "utility", 'images', f"Q{idx}.{extension}"), "wb") as f:
         f.write(b64decode(encoded))
-    hle_dataset.loc[idx, "image"] = f"Q{idx}.{extension}"
 
 with open(os.path.join(os.getcwd(), "utility", "hle_dataset.csv"), "w", encoding="utf-8") as f:
     hle_dataset.to_csv(f, index=False)
