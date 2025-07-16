@@ -3,7 +3,7 @@ import requests
 from typing import Any
 from logging import Logger
 
-async def response_generator_openrouter(openrouter_key: str, payload: dict[str, Any], logger: Logger) -> tuple[str | None, bool]:
+async def response_generator_openrouter(openrouter_key: str, payload: dict[str, Any], logger: Logger) -> tuple[str | None, bool] | tuple[dict[str, Any] | None, bool]:
     try:
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
@@ -16,3 +16,4 @@ async def response_generator_openrouter(openrouter_key: str, payload: dict[str, 
         msg = f"Error in LLM Call: {e}"
         logger.error(msg)
         return msg, False
+

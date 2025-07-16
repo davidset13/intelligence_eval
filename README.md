@@ -30,4 +30,11 @@
 * `python src/get_hle_dataset.py`
 * The dataset should save to the `utility` folder.
 
+## Verdict
 
+* Barebones evaluations prove this is possible. Weekly calibration is the main required algorithm.
+* Weekly question calibration required, but possible. One calibration session should cost $100-$200
+
+## Next Steps
+
+* GAIA replication (much more difficult)
