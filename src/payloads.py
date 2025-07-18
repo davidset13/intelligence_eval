@@ -6,7 +6,7 @@ class GeneralHLEEval(BaseModel):
     model: str
     config: Optional[dict[str, Any]] = {}
 
-async def create_general_eval_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
+def create_general_eval_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
     question = str(row["question"])
     image = str(row["image"])
     answer_type = str(row["answer_type"])
@@ -116,7 +116,7 @@ async def create_general_eval_payload(model: str, row: pd.Series, config: dict[s
             }
         
 
-async def create_general_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
+def create_general_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
     question = str(row["question"])
     correct_answer = str(row["answer"])
     return {
@@ -182,7 +182,7 @@ async def create_general_score_payload(model: str, row: pd.Series, response: str
                             "description": "Answer 'yes' if extracted_final_answer matches the [correct_answer] given above, or is within a small margin of error for the numerical problems. Answer 'no' otherwise, i.e. if there is any inconsistency, ambiguity, non-equivalency, or if the extracted answer is incorrect."
                         },
                         "confidence": {
-                            "type": "string",
+                            "type": "number",
                             "minimum": 0,
                             "maximum": 100,
                             "description": "The extracted confidence score between 0% and 100% from [response]. Put 100 if there is no confidence score available."
