@@ -1,0 +1,17 @@
+[project]
+name = "intelligence_eval"
+version = "0.1"
+description = "Intelligence eval/calibration for LLM agents"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.3.1",
+    "fastparquet>=2024.11.0",
+    "pyarrow>=20.0.0",
+    "huggingface-hub>=0.33.2",
+    "dotenv>=0.9.9",
+    "pandas-stubs>=2.3.0.250703",
+    "fastapi>=0.116.0",
+    "uvicorn>=0.35.0"
+]
+
