@@ -1,12 +1,7 @@
-from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any
 import pandas as pd
 
-class GeneralHLEEval(BaseModel):
-    model: str
-    config: Optional[dict[str, Any]] = {}
-
-def create_general_eval_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
+def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
     question = str(row["question"])
     image = str(row["image"])
     answer_type = str(row["answer_type"])
@@ -116,7 +111,7 @@ def create_general_eval_payload(model: str, row: pd.Series, config: dict[str, An
             }
         
 
-def create_general_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
+def create_hle_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
     question = str(row["question"])
     correct_answer = str(row["answer"])
     return {

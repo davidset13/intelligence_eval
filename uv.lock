@@ -266,6 +266,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pandas-stubs" },
     { name = "pyarrow" },
+    { name = "pydantic" },
     { name = "uvicorn" },
 ]
 
@@ -278,6 +279,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.3.1" },
     { name = "pandas-stubs", specifier = ">=2.3.0.250703" },
     { name = "pyarrow", specifier = ">=20.0.0" },
+    { name = "pydantic", specifier = ">=2.11.7" },
     { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 
