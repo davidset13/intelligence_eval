@@ -19,7 +19,7 @@ logger.addHandler(console_handler)
 
 hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv")) # type: ignore
 
-hle_dataset = hle_dataset_full.sample(n=100)
+hle_dataset = hle_dataset_full
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")
@@ -44,6 +44,9 @@ async def general_llm_eval(payload: GeneralHLEEval) -> dict[str, float]:
 
     try:
         accuracy = successful_results / total_results
+        logger.info(f"Accuracy: {accuracy}")
+        logger.info(f"Successful Results: {successful_results}")
+        logger.info(f"Total Results: {total_results}")
     except ZeroDivisionError:
         accuracy = 0
     
