@@ -82,4 +82,4 @@ async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, mode
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
-    return accuracy
+    return round(accuracy, 2)

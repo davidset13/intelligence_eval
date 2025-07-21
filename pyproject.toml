@@ -14,5 +14,10 @@ dependencies = [
     "fastapi>=0.116.0",
     "uvicorn>=0.35.0",
     "pydantic>=2.11.7",
+    "scipy>=1.16.0",
+    "scipy-stubs>=1.16.0.2",
+    "sympy>=1.14.0",
+    "scikit-learn>=1.7.1",
+    "numpy>=2.3.1",
 ]
 
