@@ -191,5 +191,3 @@ def create_hle_score_payload(model: str, row: pd.Series, response: str, config: 
         **config
     }
     
-
-
