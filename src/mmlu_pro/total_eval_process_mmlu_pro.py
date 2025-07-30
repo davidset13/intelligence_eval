@@ -3,20 +3,20 @@ import ast
 import pandas as pd
 from logging import Logger
 from async_llm_call import response_generator_openrouter
-from hle.payloads_hle import create_hle_init_payload, create_hle_score_payload
+from mmlu_pro.payloads_mmlu_pro import create_mmlu_pro_init_payload, create_mmlu_pro_score_payload
 import time
 from typing import Any, Coroutine
 from math_evals.MLE import Wald_CI
 
-async def init_call_hle(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series) -> bool | str | None:
-    payload_init = create_hle_init_payload(model_init, row, {})
+async def total_eval_process_mmlu_pro(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series) -> bool | str | None:
+    payload_init = create_mmlu_pro_init_payload(model_init, row, {})
     response = await response_generator_openrouter(openrouter_key, payload_init, logger)
     if not response[1]:
         return False
     elif response[0] is None:
         return False
     else:
-        payload_eval = create_hle_score_payload(model_eval, row, response[0], {})
+        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response[0], {})
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
         if not response_eval[1]:
             return False
@@ -58,16 +58,12 @@ async def init_call_hle(openrouter_key: str, logger: Logger, model_init: str, mo
                     return False
 
 
-async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, hle_dataset: pd.DataFrame) -> dict[str, float | tuple[float, float] | None] | None:
+async def mmlu_pro_scoring(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, mmlu_pro_dataset: pd.DataFrame) -> dict[str, float | tuple[float, float] | None] | None:
     
-    try:
-        time_start = time.time()
-        llm_tasks: list[Coroutine[Any, Any, bool | str | None]] = [init_call_hle(openrouter_key, logger, model_init, model_eval, row) for _, row in hle_dataset.iterrows()]
-        results = await asyncio.gather(*llm_tasks, return_exceptions=True)
-        results = [result for result in results if (result is not None and result is not False and not isinstance(result, Exception))]
-    except Exception as e:
-        logger.error(f"Error in hle_scoring: {e}")
-        return None
+    time_start = time.time()
+    llm_tasks: list[Coroutine[Any, Any, bool | str | None]] = [total_eval_process_mmlu_pro(openrouter_key, logger, model_init, model_eval, row) for _, row in mmlu_pro_dataset.iterrows()]
+    results = await asyncio.gather(*llm_tasks)
+    results = [result for result in results if (result is not None and result is not False)]
 
     successful_results: int = 0
     total_results: int = len(results)
@@ -84,8 +80,9 @@ async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, mode
         logger.info("No results found. Invalid LLM calls.")
         return
     
-    hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy) if accuracy is not None else None # type: ignore
+    mmlu_pro_ci = Wald_CI("bernoulli", 2500, len(mmlu_pro_dataset), accuracy) if accuracy is not None else None # type: ignore
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
-    return {"hle_accuracy": round(accuracy, 2), "hle_ci": hle_ci}
+
+    return {"mmlu_pro_accuracy": round(accuracy, 2), "mmlu_pro_ci": mmlu_pro_ci}

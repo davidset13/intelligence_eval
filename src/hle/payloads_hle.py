@@ -1,5 +1,11 @@
 from typing import Any
 import pandas as pd
+import os
+
+with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_MC.md"), "r", encoding="utf-8") as f:
+    hle_sys_prompt_mc = f.read()
+with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_EX.md"), "r", encoding="utf-8") as f:
+    hle_sys_prompt_ex = f.read()
 
 def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
     question = str(row["question"])
@@ -12,10 +18,7 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) 
                 "messages": [
                     {
                         "role": "system",
-                        "content": """Your response should be in the following format:
-                                        Explanation: {your explanation for your answer choice}
-                                        Answer: {your chosen answer}
-                                        Confidence: {your confidence score between 0% and 100% for your answer}"""
+                        "content": hle_sys_prompt_mc
                     },
                     {
                         "role": "user",
@@ -39,11 +42,7 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) 
                 "messages": [
                     {
                         "role": "system",
-                        "content": """Your response should be in the following format:
-                                        Explanation: {your explanation for your final answer}
-                                        Exact Answer: {your succinct, final answer}
-                                        Confidence: {your confidence score between 0% and 100% for your answer}
-                                    """
+                        "content": hle_sys_prompt_ex
                     },
                     {
                         "role": "user",
@@ -68,10 +67,7 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) 
                 "messages": [
                     {
                         "role": "system",
-                        "content": """Your response should be in the following format:
-                                        Explanation: {your explanation for your answer choice}
-                                        Answer: {your chosen answer}
-                                        Confidence: {your confidence score between 0% and 100% for your answer}"""
+                        "content": hle_sys_prompt_mc
                     },
                     {
                         "role": "user",
@@ -91,11 +87,7 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) 
                 "messages": [
                     {
                         "role": "system",
-                        "content": """Your response should be in the following format:
-                                        Explanation: {your explanation for your final answer}
-                                        Exact Answer: {your succinct, final answer}
-                                        Confidence: {your confidence score between 0% and 100% for your answer}
-                                    """
+                        "content": hle_sys_prompt_ex
                     },
                     {
                         "role": "user",

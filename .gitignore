@@ -210,3 +210,4 @@ hle_dataset.csv
 .private.env
 *.png
 *.jpg
+mmlu_pro_dataset.csv
