@@ -31,7 +31,7 @@ def Wald_CI(distribution: str, N: int, n: int, p_hat: float, alpha: float = 0.05
     confidence_interval: float = 1 - alpha/2
     z_score: float = norm.ppf(confidence_interval)
     margin_of_error: float = z_score * standard_error
-    return (float(round(p_hat - margin_of_error, 2)), float(round(p_hat + margin_of_error, 2)))
+    return (float(round(p_hat - margin_of_error, 4)), float(round(p_hat + margin_of_error, 4)))
 
 
 min_sample_size_safe_mle_wald("bernoulli", 2500, eps = 0.04)

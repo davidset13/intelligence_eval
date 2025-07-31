@@ -1,21 +1,16 @@
 from typing import Any
 import pandas as pd
-import os
 
-with open(os.path.join(os.getcwd(), "prompts", "mmlu_pro", "MMLU_PRO_5SHOT.md"), "r", encoding="utf-8") as f:
-    mmlu_pro_5shot = f.read()
-
-
-def create_mmlu_pro_init_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
+def create_mmlu_pro_init_payload(model: str, row: pd.Series, config: dict[str, Any], mmlu_pro_5shot: str) -> dict[str, Any]:
     question = str(row["question"])
     options = str(row["options"])
     return {
                 "model": model,
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": mmlu_pro_5shot
-                    },
+                    #{
+                    #    "role": "system",
+                    #    "content": mmlu_pro_5shot
+                    #},
                     {
                         "role": "user",
                         "content": [

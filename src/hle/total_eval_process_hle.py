@@ -8,72 +8,72 @@ import time
 from typing import Any, Coroutine
 from math_evals.MLE import Wald_CI
 
-async def init_call_hle(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series) -> bool | str | None:
-    payload_init = create_hle_init_payload(model_init, row, {})
+
+async def init_call_hle(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str) -> bool | None:
+    payload_init = create_hle_init_payload(model_init, row, {}, hle_sys_prompt_mc, hle_sys_prompt_ex)
     response = await response_generator_openrouter(openrouter_key, payload_init, logger)
-    if not response[1]:
-        return False
-    elif response[0] is None:
-        return False
+    if not response["success"] or response["content"] is None:
+        return None
     else:
-        payload_eval = create_hle_score_payload(model_eval, row, response[0], {})
+        payload_eval = create_hle_score_payload(model_eval, row, response["content"], {})
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
-        if not response_eval[1]:
-            return False
+        if not response_eval["success"] or response_eval["content"] is None:
+            return None
         else:
             try:
-                if response_eval[0] is None:
+                correct = ast.literal_eval(response_eval["content"])['correct']
+                if correct == 'yes':
+                    return True
+                else:
                     return False
-                return ast.literal_eval(response_eval[0])['correct']
-            except Exception:
+            except:
                 try:
-                    if response_eval[0] is not None and ('"correct":' in response_eval[0] or "'correct':" in response_eval[0]):
-                        idx1 = response_eval[0].find('"correct":')
-                        idx2 = response_eval[0].find("'correct':")
+                    if ('"correct":' in response_eval["content"] or "'correct':" in response_eval["content"]):
+                        idx1 = response_eval["content"].find('"correct":')
+                        idx2 = response_eval["content"].find("'correct':")
                         if idx1 != -1 and idx2 != -1:
                             return False
                         elif idx1 != -1:
-                            if_yes = response_eval[0][idx1:].find('yes')
-                            if_no = response_eval[0][idx1:].find('no')
+                            if_yes = response_eval["content"][idx1:].find('yes')
+                            if_no = response_eval["content"][idx1:].find('no')
                             if if_yes == -1:
                                 return False
                             elif if_yes < if_no:
-                                return 'yes'
+                                return True
                             else:
                                 return False
                         elif idx2 != -1:
-                            if_yes = response_eval[0][idx2:].find('yes')
-                            if_no = response_eval[0][idx2:].find('no')
+                            if_yes = response_eval["content"][idx2:].find('yes')
+                            if_no = response_eval["content"][idx2:].find('no')
                             if if_yes == -1:
                                 return False
                             elif if_yes < if_no:
-                                return 'yes'
+                                return True
                             else:
                                 return False
                         else:
                             return False
                     else:
                         return False
-                except Exception:
+                except:
                     return False
 
 
-async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, hle_dataset: pd.DataFrame) -> dict[str, float | tuple[float, float] | None] | None:
+async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, hle_dataset: pd.DataFrame, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str) -> dict[str, float | tuple[float, float] | None] | None:
     
     try:
         time_start = time.time()
-        llm_tasks: list[Coroutine[Any, Any, bool | str | None]] = [init_call_hle(openrouter_key, logger, model_init, model_eval, row) for _, row in hle_dataset.iterrows()]
+        llm_tasks: list[Coroutine[Any, Any, bool | None]] = [init_call_hle(openrouter_key, logger, model_init, model_eval, row, hle_sys_prompt_mc, hle_sys_prompt_ex) for _, row in hle_dataset.iterrows()]
         results = await asyncio.gather(*llm_tasks, return_exceptions=True)
-        results = [result for result in results if (result is not None and result is not False and not isinstance(result, Exception))]
+        results = [result for result in results if (result is not None and not isinstance(result, BaseException))]
+        successful_results: int = 0
+        total_results: int = len(results)
+        for result in results:
+            if result:
+                successful_results += 1
     except Exception as e:
         logger.error(f"Error in hle_scoring: {e}")
-        return None
-
-    successful_results: int = 0
-    total_results: int = len(results)
-    for result in results:
-        if result == 'yes':
-            successful_results += 1
+        return
 
     try:
         accuracy = successful_results / total_results
@@ -84,8 +84,9 @@ async def hle_scoring(openrouter_key: str, logger: Logger, model_init: str, mode
         logger.info("No results found. Invalid LLM calls.")
         return
     
-    hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy) if accuracy is not None else None # type: ignore
+    hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy)
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
-    return {"hle_accuracy": round(accuracy, 2), "hle_ci": hle_ci}
+
+    return {"hle_accuracy": round(accuracy, 4), "hle_ci": hle_ci}

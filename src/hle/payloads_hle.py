@@ -1,13 +1,7 @@
 from typing import Any
 import pandas as pd
-import os
 
-with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_MC.md"), "r", encoding="utf-8") as f:
-    hle_sys_prompt_mc = f.read()
-with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_EX.md"), "r", encoding="utf-8") as f:
-    hle_sys_prompt_ex = f.read()
-
-def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any]) -> dict[str, Any]:
+def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], hle_sys_prompt_mc: str, hle_sys_prompt_ex: str) -> dict[str, Any]:
     question = str(row["question"])
     image = str(row["image"])
     answer_type = str(row["answer_type"])

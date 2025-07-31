@@ -14,11 +14,13 @@ from typing import Coroutine
 from mmlu_pro.total_eval_process_mmlu_pro import mmlu_pro_scoring
 import asyncio
 
+
 class IntelligenceEvalInput(BaseModel):
     model: str
     config: Optional[dict[str, Any]] = {}
     hle: bool
     mmlu_pro: bool
+
 
 class IntelligenceEvalOutput(BaseModel):
     hle_accuracy: float | None = None
@@ -40,19 +42,26 @@ if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
 
 openrouter_api_key: str= os.getenv("OPENROUTER_API_KEY") or ""
 
+with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_MC.md"), "r", encoding="utf-8") as f:
+    hle_sys_prompt_mc = f.read()
+with open(os.path.join(os.getcwd(), "prompts", "hle", "HLE_SYS_PROMPT_EX.md"), "r", encoding="utf-8") as f:
+    hle_sys_prompt_ex = f.read()
+with open(os.path.join(os.getcwd(), "prompts", "mmlu_pro", "MMLU_PRO_5SHOT.md"), "r", encoding="utf-8") as f:
+    mmlu_pro_5shot = f.read()
+
 hle_app = FastAPI()
 
 @hle_app.post("/llm/general")
-async def general_llm_eval(payload: IntelligenceEvalInput) -> IntelligenceEvalOutput:
+async def general_llm_eval(payload: IntelligenceEvalInput):
     async_tasks: list[Coroutine[Any, Any, dict[str, float | tuple[float, float] | None] | None]] = []
 
     if payload.hle:
         hle_dataset, _ = train_test_split(hle_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_full), eps = 0.04), stratify = hle_dataset_full["category"], random_state = None)  # type: ignore
-        async_tasks.append(hle_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", hle_dataset)) # type: ignore
+        async_tasks.append(hle_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex)) # type: ignore
     
     if payload.mmlu_pro:
         mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)  # type: ignore
-        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset)) # type: ignore
+        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot)) # type: ignore
 
     results = await asyncio.gather(*async_tasks)
     
