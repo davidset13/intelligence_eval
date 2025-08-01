@@ -1,18 +1,20 @@
 import pandas as pd
 import os
+import sys
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from hle.total_eval_process_hle import hle_scoring
-from logging import getLogger
 import uvicorn
-import logging
 from pydantic import BaseModel
 from typing import Any, Optional
-from sklearn.model_selection import train_test_split  # type: ignore
+from sklearn.model_selection import train_test_split
 from math_evals.MLE import min_sample_size_safe_mle_wald
 from typing import Coroutine
 from mmlu_pro.total_eval_process_mmlu_pro import mmlu_pro_scoring
 import asyncio
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from cmn_pckgs.logger import get_logger
 
 
 class IntelligenceEvalInput(BaseModel):
@@ -28,14 +30,10 @@ class IntelligenceEvalOutput(BaseModel):
     mmlu_pro_accuracy: float | None = None
     mmlu_pro_ci: tuple[float, float] | None = None
 
-logging.basicConfig(level=logging.INFO)
-logger = getLogger("__main__")
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-logger.addHandler(console_handler)
+logger = get_logger("intelligence_server")
 
-hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv")) # type: ignore
-mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"), sep="\t") # type: ignore
+hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv"))
+mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"), sep="\t")
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")
@@ -56,12 +54,14 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
     async_tasks: list[Coroutine[Any, Any, dict[str, float | tuple[float, float] | None] | None]] = []
 
     if payload.hle:
-        hle_dataset, _ = train_test_split(hle_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_full), eps = 0.04), stratify = hle_dataset_full["category"], random_state = None)  # type: ignore
-        async_tasks.append(hle_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex)) # type: ignore
+        hle_dataset, _ = train_test_split(hle_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_full), eps = 0.04), stratify = hle_dataset_full["category"], random_state = None)
+        hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
+        async_tasks.append(hle_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex))
     
     if payload.mmlu_pro:
-        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)  # type: ignore
-        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot)) # type: ignore
+        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
+        mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
+        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot))
 
     results = await asyncio.gather(*async_tasks)
     

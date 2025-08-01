@@ -7,10 +7,10 @@ def create_mmlu_pro_init_payload(model: str, row: pd.Series, config: dict[str, A
     return {
                 "model": model,
                 "messages": [
-                    #{
-                    #    "role": "system",
-                    #    "content": mmlu_pro_5shot
-                    #},
+                    {
+                        "role": "system",
+                        "content": mmlu_pro_5shot
+                    },
                     {
                         "role": "user",
                         "content": [
