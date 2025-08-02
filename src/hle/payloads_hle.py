@@ -1,7 +1,8 @@
 from typing import Any
 import pandas as pd
 
-def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], hle_sys_prompt_mc: str, hle_sys_prompt_ex: str) -> dict[str, Any]:
+# THIS METHOD IS DEPRECATED AND WILL BE REMOVED IN FUTURE RELEASE
+def create_hle_init_payload(model: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str) -> dict[str, Any]:
     question = str(row["question"])
     image = str(row["image"])
     answer_type = str(row["answer_type"])
@@ -28,7 +29,6 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], 
                         ]
                     }
                 ],
-                **config
             }
         else:
             return {
@@ -52,7 +52,6 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], 
                         ]
                     }
                 ],
-                **config
             }
     else:
         if answer_type == "multiple_choice":
@@ -73,7 +72,6 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], 
                         ]
                     }
                 ],
-                **config
             }
         else:
             return {
@@ -93,11 +91,10 @@ def create_hle_init_payload(model: str, row: pd.Series, config: dict[str, Any], 
                         ]
                     }
                 ],
-                **config
             }
         
 
-def create_hle_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
+def create_hle_score_payload(model: str, row: pd.Series, response: str) -> dict[str, Any]:
     question = str(row["question"])
     correct_answer = str(row["answer"])
     return {
@@ -174,6 +171,5 @@ def create_hle_score_payload(model: str, row: pd.Series, response: str, config: 
                 }
             },
         },
-        **config
     }
     

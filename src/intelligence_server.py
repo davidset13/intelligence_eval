@@ -5,30 +5,16 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from hle.total_eval_process_hle import hle_scoring
 import uvicorn
-from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any, Coroutine
 from sklearn.model_selection import train_test_split
 from math_evals.MLE import min_sample_size_safe_mle_wald
 from typing import Coroutine
 from mmlu_pro.total_eval_process_mmlu_pro import mmlu_pro_scoring
 import asyncio
+from payloads import IntelligenceEvalInput, IntelligenceEvalOutput
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cmn_pckgs.logger import get_logger
-
-
-class IntelligenceEvalInput(BaseModel):
-    model: str
-    config: Optional[dict[str, Any]] = {}
-    hle: bool
-    mmlu_pro: bool
-
-
-class IntelligenceEvalOutput(BaseModel):
-    hle_accuracy: float | None = None
-    hle_ci: tuple[float, float] | None = None
-    mmlu_pro_accuracy: float | None = None
-    mmlu_pro_ci: tuple[float, float] | None = None
 
 logger = get_logger("intelligence_server")
 
@@ -56,14 +42,18 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
     if payload.hle:
         hle_dataset, _ = train_test_split(hle_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_full), eps = 0.04), stratify = hle_dataset_full["category"], random_state = None)
         hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
-        async_tasks.append(hle_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex))
+        async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled))
     
-    if payload.mmlu_pro:
-        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
-        mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
-        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot))
-
-    results = await asyncio.gather(*async_tasks)
+    #if payload.mmlu_pro:
+    #    mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
+    #    mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
+    #    async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot))
+    
+    try:
+        results = await asyncio.gather(*async_tasks)
+    except Exception as e:
+        logger.error(f"Error in Intelligence Server: {e}")
+        raise HTTPException(status_code=500)
     
     hle_accuracy = None
     hle_ci = None
@@ -82,6 +72,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
                 mmlu_pro_ci = result['mmlu_pro_ci']
 
     return IntelligenceEvalOutput(
+        agent_name=payload.agent_name if payload.agent_name else None,
         hle_accuracy=hle_accuracy,
         hle_ci=hle_ci,
         mmlu_pro_accuracy=mmlu_pro_accuracy,

@@ -10,12 +10,12 @@ from math_evals.MLE import Wald_CI
 
 
 async def init_call_mmlu_pro(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series, mmlu_pro_5shot: str) -> bool | None:
-    payload_init = create_mmlu_pro_init_payload(model_init, row, {}, mmlu_pro_5shot)
+    payload_init = create_mmlu_pro_init_payload(model_init, row, mmlu_pro_5shot)
     response = await response_generator_openrouter(openrouter_key, payload_init, logger)
     if not response["success"] or response["content"] is None:
         return None
     else:
-        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response["content"], {})
+        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response["content"])
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
         if not response_eval["success"] or response_eval["content"] is None:
             return None

@@ -1,7 +1,7 @@
 from typing import Any
 import pandas as pd
 
-def create_mmlu_pro_init_payload(model: str, row: pd.Series, config: dict[str, Any], mmlu_pro_5shot: str) -> dict[str, Any]:
+def create_mmlu_pro_init_payload(model: str, row: pd.Series, mmlu_pro_5shot: str) -> dict[str, Any]:
     question = str(row["question"])
     options = str(row["options"])
     return {
@@ -21,11 +21,10 @@ def create_mmlu_pro_init_payload(model: str, row: pd.Series, config: dict[str, A
                         ]
                     }
                 ],
-                **config
             }
         
 
-def create_mmlu_pro_score_payload(model: str, row: pd.Series, response: str, config: dict[str, Any]) -> dict[str, Any]:
+def create_mmlu_pro_score_payload(model: str, row: pd.Series, response: str) -> dict[str, Any]:
     question = str(row["question"])
     correct_answer = str(row["answer"])
     options = str(row["options"])
@@ -78,6 +77,5 @@ def create_mmlu_pro_score_payload(model: str, row: pd.Series, response: str, con
                 }
             },
         },
-        **config
     }
     

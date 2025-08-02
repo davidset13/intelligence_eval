@@ -15,7 +15,6 @@ def set_levels(levels: dict[str, int]) -> None:
         logging.getLogger(logger).setLevel(level)
 
 
-# Minimize kafka log chattiness.
 set_levels({'kafka': logging.WARNING})
 
 
