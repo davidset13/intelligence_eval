@@ -7,8 +7,8 @@
 
 ## Currently Supported Bechmarks:
 
-[Humanity's Last Exam (HLE)](https://agi.safe.ai/)
-[Massive Multitask Language Understanding Pro (MMLU-Pro)](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
+*[Humanity's Last Exam (HLE)](https://agi.safe.ai/)
+*[Massive Multitask Language Understanding Pro (MMLU-Pro)](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
 
 ## IMPORTANT
 
