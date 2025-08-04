@@ -52,7 +52,7 @@ async def test_agent_post(payload: TestAgentPayload):
         payload_llm["response_format"] = {
             "type": payload.output_type
         }
-
+    
     response = await response_generator_openrouter(openrouter_api_key, payload_llm, logger)
     return response["content"]
 

@@ -44,10 +44,10 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
         hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
         async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled))
     
-    #if payload.mmlu_pro:
-    #    mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
-    #    mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
-    #    async_tasks.append(mmlu_pro_scoring(openrouter_api_key, logger, payload.model, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, mmlu_pro_5shot))
+    if payload.mmlu_pro:
+        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
+        mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
+        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name))
     
     try:
         results = await asyncio.gather(*async_tasks)

@@ -8,21 +8,26 @@ import time
 from typing import Any, Coroutine
 from math_evals.MLE import Wald_CI
 import requests
+import copy
+
 
 async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool) -> bool | None:
     try:
+        agent_params_copy = copy.deepcopy(agent_params)
+        
         question = str(row["question"])
         image = str(row["image"])
         answer_type = str(row["answer_type"])
+        correct_answer = str(row["answer"])
         if image != "nan":
-            if images_enabled:
+            if not images_enabled:
                 return None
-            agent_params[image_param_name] = image
+            agent_params_copy[image_param_name] = image
         if answer_type == "multiple_choice":
-            agent_params[prompt_param_name] = hle_sys_prompt_mc + "\n\n" + question
+            agent_params_copy[prompt_param_name] = hle_sys_prompt_mc + "\n\n" + question
         else:
-            agent_params[prompt_param_name] = hle_sys_prompt_ex + "\n\n" + question
-        response = await asyncio.to_thread(requests.post, agent_url, json=agent_params)
+            agent_params_copy[prompt_param_name] = hle_sys_prompt_ex + "\n\n" + question
+        response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
         response_content = response.json()
         if len(response_content) == 0 or response_content is None:
             return None
@@ -30,7 +35,7 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         logger.error(f"Error Calling Agent: {e}")
         return None
     try:
-        payload_eval = create_hle_score_payload(model_eval, row, response_content)
+        payload_eval = create_hle_score_payload(model_eval, question, correct_answer, response_content)
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
         if not response_eval["success"] or response_eval["content"] is None:
             return None

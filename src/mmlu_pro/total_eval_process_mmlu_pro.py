@@ -3,19 +3,30 @@ import ast
 import pandas as pd
 from logging import Logger
 from async_llm_call import response_generator_openrouter
-from mmlu_pro.payloads_mmlu_pro import create_mmlu_pro_init_payload, create_mmlu_pro_score_payload
+from mmlu_pro.payloads_mmlu_pro import create_mmlu_pro_score_payload
 import time
 from typing import Any, Coroutine
 from math_evals.MLE import Wald_CI
+import requests
+import copy
 
 
-async def init_call_mmlu_pro(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, row: pd.Series, mmlu_pro_5shot: str) -> bool | None:
-    payload_init = create_mmlu_pro_init_payload(model_init, row, mmlu_pro_5shot)
-    response = await response_generator_openrouter(openrouter_key, payload_init, logger)
-    if not response["success"] or response["content"] is None:
+async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> bool | None:
+    try:
+        agent_params_copy = copy.deepcopy(agent_params)
+        
+        question = str(row["question"])
+        options = str(row["options"])
+        agent_params_copy[prompt_param_name] = f"Question: {question} \n\n Options: {options}"
+        response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
+        response_content = response.json()
+        if len(response_content) == 0 or response_content is None:
+            return None
+    except Exception as e:
+        logger.error(f"Error Calling Agent: {e}")
         return None
-    else:
-        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response["content"])
+    try:
+        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response_content)
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
         if not response_eval["success"] or response_eval["content"] is None:
             return None
@@ -57,13 +68,16 @@ async def init_call_mmlu_pro(openrouter_key: str, logger: Logger, model_init: st
                         return False
                 except:
                     return False
+    except Exception as e:
+        logger.error(f"Error Evaluating Agent: {e}")
+        return None
 
 
-async def mmlu_pro_scoring(openrouter_key: str, logger: Logger, model_init: str, model_eval: str, mmlu_pro_dataset: pd.DataFrame, mmlu_pro_5shot: str) -> dict[str, float | tuple[float, float] | None] | None:
+async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, mmlu_pro_dataset: pd.DataFrame, prompt_param_name: Any) -> dict[str, float | tuple[float, float] | None] | None:
 
     try:
         time_start = time.time()
-        llm_tasks: list[Coroutine[Any, Any, bool | None]] = [init_call_mmlu_pro(openrouter_key, logger, model_init, model_eval, row, mmlu_pro_5shot) for _, row in mmlu_pro_dataset.iterrows()]
+        llm_tasks: list[Coroutine[Any, Any, bool | None]] = [init_call_mmlu_pro(openrouter_key, agent_url, agent_params, logger, model_eval, row, prompt_param_name) for _, row in mmlu_pro_dataset.iterrows()]
         results = await asyncio.gather(*llm_tasks, return_exceptions=True)
         results = [result for result in results if (result is not None and not isinstance(result, BaseException))]
         successful_results: int = 0
