@@ -13,7 +13,7 @@
 
 ## IMPORTANT
 
-* Make sure to follow proper protocol when using these datasets. Do not post them online or else they will become training data for future LLMs. Adhere to any HuggingFace protocols and terms of service when using
+* Make sure to follow proper protocol when using these datasets. Do not post them online or else they will become training data for future LLMs. Adhere to any HuggingFace protocols and terms of service when using.
 
 ## Setup
 ```bash
@@ -96,3 +96,15 @@ resp = requests.post("http://127.0.0.1:3000/llm/general", json={"agent_name": "t
     
     - `mmlu_pro`: If True, the intelligence server will create an evaluation of Massive Multitask Language Understadning Pro (MMLU-Pro).
         - Type: Boolean
+
+## Changing Margin of Error
+
+* Open `intelligence_server.py` and go to line 43 (HLE), 48 (MMLU-Pro)
+* Change the parameter `eps` to something other than 0.04 (default).
+* The greater the margin of error, the less accurate the results, but fewer questions are used as input
+
+## Interpretation of Results
+
+* The result will come as a JSON that returns the name of your agent, if provided, as well as results.
+* It gives the raw accuracy scores on whichever benchmarks you enabled.
+* It also gives the 95% confidence intervals of each evaluation.
