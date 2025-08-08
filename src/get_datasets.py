@@ -14,9 +14,18 @@ splits = {'test': 'data/test-00000-of-00001.parquet', 'validation': 'data/valida
 mmlu_pro_dataset = pd.read_parquet("hf://datasets/TIGER-Lab/MMLU-Pro/" + splits["test"])
 
 with open(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"), "w", encoding="utf-8") as f:
-    mmlu_pro_dataset.to_csv(f, index=False, sep="\t")
+    mmlu_pro_dataset.to_csv(f, index=False)
     f.flush()
     os.fsync(f.fileno())
 
 print("MMLU-Pro Dataset Downloaded")
+
+gpqa_dataset = pd.read_csv("hf://datasets/Idavidrein/gpqa/gpqa_diamond.csv")
+
+with open(os.path.join(os.getcwd(), "utility", "gpqa_dataset.csv"), "w", encoding="utf-8") as f:
+    gpqa_dataset.to_csv(f, index=False)
+    f.flush()
+    os.fsync(f.fileno())
+
+print("GPQA Dataset Downloaded")
 

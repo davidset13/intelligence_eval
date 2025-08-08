@@ -19,7 +19,7 @@ from cmn_pckgs.logger import get_logger
 logger = get_logger("intelligence_server")
 
 hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv"))
-mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"), sep="\t")
+mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"))
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")

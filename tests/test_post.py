@@ -4,3 +4,8 @@ response = requests.post("http://127.0.0.1:3000/llm/general", json={"agent_name"
 
 print(response.json())
 
+import os
+import pandas as pd
+
+df = pd.read_csv(os.path.join(os.getcwd(), "utility", "gpqa_dataset.csv"))
+df.loc[0, "Question"]
