@@ -8,7 +8,7 @@ import uvicorn
 from typing import Any, Coroutine
 from sklearn.model_selection import train_test_split
 from math_evals.MLE import min_sample_size_safe_mle_wald
-from typing import Coroutine, get_type_hints
+from typing import Coroutine
 from mmlu_pro.total_eval_process_mmlu_pro import mmlu_pro_scoring
 from gpqa_diamond.total_eval_process_gpqa import gpqa_scoring
 import asyncio
@@ -61,33 +61,15 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
     except Exception as e:
         logger.error(f"Error in Intelligence Server: {e}")
         raise HTTPException(status_code=500)
-    
-    hle_accuracy = hle_ci = mmlu_pro_accuracy = mmlu_pro_ci = gpqa_accuracy = gpqa_ci = None
-
+        
+    final_resp = IntelligenceEvalOutput(agent_name=payload.agent_name)
     for result in results:
         if result is not None:
-            if 'hle_accuracy' in result and isinstance(result['hle_accuracy'], float):
-                hle_accuracy = result['hle_accuracy']
-            if 'hle_ci' in result and isinstance(result['hle_ci'], tuple):
-                hle_ci = result['hle_ci']
-            if 'mmlu_pro_accuracy' in result and isinstance(result['mmlu_pro_accuracy'], float):
-                mmlu_pro_accuracy = result['mmlu_pro_accuracy']
-            if 'mmlu_pro_ci' in result and isinstance(result['mmlu_pro_ci'], tuple):
-                mmlu_pro_ci = result['mmlu_pro_ci']
-            if 'gpqa_accuracy' in result and isinstance(result['gpqa_accuracy'], float):
-                gpqa_accuracy = result['gpqa_accuracy']
-            if 'gpqa_ci' in result and isinstance(result['gpqa_ci'], tuple):
-                gpqa_ci = result['gpqa_ci']
+            for key, value in result.items():
+                if key in IntelligenceEvalOutput.model_fields.keys():
+                    setattr(final_resp, key, value)
 
-    return IntelligenceEvalOutput(
-        agent_name=payload.agent_name if payload.agent_name else None,
-        hle_accuracy=hle_accuracy,
-        hle_ci=hle_ci,
-        mmlu_pro_accuracy=mmlu_pro_accuracy,
-        mmlu_pro_ci=mmlu_pro_ci,
-        gpqa_accuracy=gpqa_accuracy,
-        gpqa_ci=gpqa_ci
-    )
+    return final_resp
 
 if __name__ == "__main__":
     try:

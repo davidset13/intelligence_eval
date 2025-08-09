@@ -34,4 +34,3 @@ def Wald_CI(distribution: str, N: int, n: int, p_hat: float, alpha: float = 0.05
     return (float(round(p_hat - margin_of_error, 4)), float(round(p_hat + margin_of_error, 4)))
 
 
-min_sample_size_safe_mle_wald("bernoulli", 2500, eps = 0.04)

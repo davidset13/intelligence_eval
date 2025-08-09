@@ -9,9 +9,21 @@ from typing import Any, Coroutine
 from math_evals.MLE import Wald_CI
 import requests
 import copy
+from collections import defaultdict
 
+value_counts = {
+    "Math": 1021,
+    "Biology/Medicine": 280,
+    "Computer Science/AI": 241,
+    "Other": 233,
+    "Physics": 230,
+    "Humanities/Social Science": 219,
+    "Chemistry": 165,
+    "Engineering": 111
+}
 
-async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool) -> bool | None:
+async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool) -> tuple[bool, str] | None:
+    
     try:
         agent_params_copy = copy.deepcopy(agent_params)
         
@@ -19,6 +31,7 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         image = str(row["image"])
         answer_type = str(row["answer_type"])
         correct_answer = str(row["answer"])
+        category = str(row["category"])
         if image != "nan":
             if not images_enabled:
                 return None
@@ -43,40 +56,42 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
             try:
                 correct = ast.literal_eval(response_eval["content"])['correct']
                 if correct == 'yes':
-                    return True
+                    correct = True
                 else:
-                    return False
+                    correct = False
             except:
                 try:
                     if ('"correct":' in response_eval["content"] or "'correct':" in response_eval["content"]):
                         idx1 = response_eval["content"].find('"correct":')
                         idx2 = response_eval["content"].find("'correct':")
                         if idx1 != -1 and idx2 != -1:
-                            return False
+                            correct = False
                         elif idx1 != -1:
                             if_yes = response_eval["content"][idx1:].find('yes')
                             if_no = response_eval["content"][idx1:].find('no')
                             if if_yes == -1:
-                                return False
+                                correct = False
                             elif if_yes < if_no:
-                                return True
+                                correct = True
                             else:
-                                return False
+                                correct = False
                         elif idx2 != -1:
                             if_yes = response_eval["content"][idx2:].find('yes')
                             if_no = response_eval["content"][idx2:].find('no')
                             if if_yes == -1:
-                                return False
+                                correct = False
                             elif if_yes < if_no:
-                                return True
+                                correct = True
                             else:
-                                return False
+                                correct = False
                         else:
-                            return False
+                            correct = False
                     else:
-                        return False
+                        correct = False
                 except:
-                    return False
+                    correct = False
+        
+        return correct, category
     except Exception as e:
         logger.error(f"Error Evaluating Agent: {e}")
         return None
@@ -86,30 +101,45 @@ async def hle_scoring(openrouter_key: str, agent_url: str, agent_params: dict[An
     
     try:
         time_start = time.time()
-        llm_tasks: list[Coroutine[Any, Any, bool | None]] = [init_call_hle(openrouter_key, agent_url, agent_params, logger, model_eval, row, hle_sys_prompt_mc, hle_sys_prompt_ex, prompt_param_name, image_param_name, images_enabled) for _, row in hle_dataset.iterrows()]
+        llm_tasks: list[Coroutine[Any, Any, tuple[bool, str] | None]] = [init_call_hle(openrouter_key, agent_url, agent_params, logger, model_eval, row, hle_sys_prompt_mc, hle_sys_prompt_ex, prompt_param_name, image_param_name, images_enabled) for _, row in hle_dataset.iterrows()]
         results = await asyncio.gather(*llm_tasks, return_exceptions=True)
         results = [result for result in results if (result is not None and not isinstance(result, BaseException))]
-        successful_results: int = 0
-        total_results: int = len(results)
+        category_results: dict[str, list[int]] = defaultdict(lambda: [0, 0])
         for result in results:
-            if result:
-                successful_results += 1
+            if result[0]:
+                category_results[result[1]][0] += 1
+            category_results[result[1]][1] += 1
+
     except Exception as e:
         logger.error(f"Error in hle_scoring: {e}")
         return
 
+    total_success = sum(result[0] for result in category_results.values())
+    total_results = sum(result[1] for result in category_results.values())
+
     try:
-        accuracy = successful_results / total_results
+        accuracy = total_success / total_results
         logger.info(f"Accuracy: {accuracy}")
-        logger.info(f"Successful Results: {successful_results}")
+        logger.info(f"Successful Results: {total_success}")
         logger.info(f"Total Results: {total_results}")
+        hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy)
+        resp_dict = {"hle_accuracy": round(accuracy, 4), "hle_ci": hle_ci}
     except ZeroDivisionError:
         logger.info("No results found. Invalid LLM calls.")
         return
+
+    category_accuracy = {}
+    for category, result in category_results.items():
+        try:
+            accuracy = result[0] / result[1]
+            category_accuracy[category] = (round(accuracy, 4), Wald_CI("bernoulli", value_counts[category], result[1], accuracy))
+        except ZeroDivisionError:
+            logger.info(f"No results found for {category}. Invalid LLM calls.")
+            category_accuracy[category] = (Exception, "No results found")
     
-    hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy)
+    resp_dict['hle_categories'] = category_accuracy
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
 
-    return {"hle_accuracy": round(accuracy, 4), "hle_ci": hle_ci}
+    return resp_dict
