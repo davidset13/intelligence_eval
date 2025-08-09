@@ -9,6 +9,7 @@ class IntelligenceEvalInput(BaseModel):
     agent_params: dict[Any, Any]
     hle: bool = False
     mmlu_pro: bool = False
+    gpqa: bool = False
     images_enabled: bool = True
 
 
@@ -18,3 +19,5 @@ class IntelligenceEvalOutput(BaseModel):
     hle_ci: tuple[float, float] | None = None
     mmlu_pro_accuracy: float | None = None
     mmlu_pro_ci: tuple[float, float] | None = None
+    gpqa_accuracy: float | None = None
+    gpqa_ci: tuple[float, float] | None = None

@@ -8,8 +8,9 @@ import uvicorn
 from typing import Any, Coroutine
 from sklearn.model_selection import train_test_split
 from math_evals.MLE import min_sample_size_safe_mle_wald
-from typing import Coroutine
+from typing import Coroutine, get_type_hints
 from mmlu_pro.total_eval_process_mmlu_pro import mmlu_pro_scoring
+from gpqa_diamond.total_eval_process_gpqa import gpqa_scoring
 import asyncio
 from payloads import IntelligenceEvalInput, IntelligenceEvalOutput
 
@@ -20,6 +21,7 @@ logger = get_logger("intelligence_server")
 
 hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv"))
 mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"))
+gpqa_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "gpqa_dataset.csv"))
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")
@@ -48,6 +50,11 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
         mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
         mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
         async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name))
+
+    if payload.gpqa:
+        gpqa_dataset, _ = train_test_split(gpqa_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(gpqa_dataset_full), eps = 0.04), random_state = None)
+        gpqa_dataset = pd.DataFrame(gpqa_dataset, columns=gpqa_dataset_full.columns)
+        async_tasks.append(gpqa_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", gpqa_dataset, payload.prompt_param_name))
     
     try:
         results = await asyncio.gather(*async_tasks)
@@ -55,11 +62,8 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
         logger.error(f"Error in Intelligence Server: {e}")
         raise HTTPException(status_code=500)
     
-    hle_accuracy = None
-    hle_ci = None
-    mmlu_pro_accuracy = None
-    mmlu_pro_ci = None
-    
+    hle_accuracy = hle_ci = mmlu_pro_accuracy = mmlu_pro_ci = gpqa_accuracy = gpqa_ci = None
+
     for result in results:
         if result is not None:
             if 'hle_accuracy' in result and isinstance(result['hle_accuracy'], float):
@@ -70,13 +74,19 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
                 mmlu_pro_accuracy = result['mmlu_pro_accuracy']
             if 'mmlu_pro_ci' in result and isinstance(result['mmlu_pro_ci'], tuple):
                 mmlu_pro_ci = result['mmlu_pro_ci']
+            if 'gpqa_accuracy' in result and isinstance(result['gpqa_accuracy'], float):
+                gpqa_accuracy = result['gpqa_accuracy']
+            if 'gpqa_ci' in result and isinstance(result['gpqa_ci'], tuple):
+                gpqa_ci = result['gpqa_ci']
 
     return IntelligenceEvalOutput(
         agent_name=payload.agent_name if payload.agent_name else None,
         hle_accuracy=hle_accuracy,
         hle_ci=hle_ci,
         mmlu_pro_accuracy=mmlu_pro_accuracy,
-        mmlu_pro_ci=mmlu_pro_ci
+        mmlu_pro_ci=mmlu_pro_ci,
+        gpqa_accuracy=gpqa_accuracy,
+        gpqa_ci=gpqa_ci
     )
 
 if __name__ == "__main__":

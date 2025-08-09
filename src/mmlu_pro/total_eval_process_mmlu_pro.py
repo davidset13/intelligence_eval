@@ -14,9 +14,9 @@ import copy
 async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> bool | None:
     try:
         agent_params_copy = copy.deepcopy(agent_params)
-        
         question = str(row["question"])
         options = str(row["options"])
+        correct_answer = str(row["answer"])
         agent_params_copy[prompt_param_name] = f"Question: {question} \n\n Options: {options}"
         response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
         response_content = response.json()
@@ -26,7 +26,7 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
         logger.error(f"Error Calling Agent: {e}")
         return None
     try:
-        payload_eval = create_mmlu_pro_score_payload(model_eval, row, response_content)
+        payload_eval = create_mmlu_pro_score_payload(model_eval, question, correct_answer, options, response_content)
         response_eval = await response_generator_openrouter(openrouter_key, payload_eval, logger)
         if not response_eval["success"] or response_eval["content"] is None:
             return None
@@ -98,7 +98,7 @@ async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: di
         logger.info("No results found. Invalid LLM calls.")
         return
     
-    mmlu_pro_ci = Wald_CI("bernoulli", 2500, total_results, accuracy)
+    mmlu_pro_ci = Wald_CI("bernoulli", 12032, total_results, accuracy)
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")

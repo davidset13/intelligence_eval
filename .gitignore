@@ -206,9 +206,8 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-hle_dataset.csv
+
 .private.env
 *.png
 *.jpg
-mmlu_pro_dataset.csv
-gpqa_dataset.csv
+*.csv

@@ -1,7 +1,7 @@
 from typing import Any
-        
 
-def create_mmlu_pro_score_payload(model: str, question: str, correct_answer: str, options: str, response: str) -> dict[str, Any]:
+
+def create_gpqa_score_payload(model: str, question: str, correct_answer: str, response: str) -> dict[str, Any]:
     return {
         "model": model,
         "messages": [
@@ -15,10 +15,8 @@ def create_mmlu_pro_score_payload(model: str, question: str, correct_answer: str
                             Judge whether the following [response] to [question] is correct or not
                             based on the precise and unambiguous [correct_answer] below.
 
-                            [question]: {question}
+                            [question with options]: {question}
 
-                            [options]: {options}
-                            
                             [response]: {response}
 
                             Your judgement must be in the format and criteria specified below:
