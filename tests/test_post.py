@@ -15,7 +15,7 @@ response = requests.post(
         "prompt_param_name": "prompt",
         "image_param_name": "image",
         "hle": True, 
-        "mmlu_pro": False, 
+        "mmlu_pro": True, 
         "gpqa": False, 
         "images_enabled": True
     }

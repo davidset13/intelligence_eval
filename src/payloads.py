@@ -20,5 +20,6 @@ class IntelligenceEvalOutput(BaseModel):
     hle_categories: dict[str, tuple[float, tuple[float, float]]] | None = None
     mmlu_pro_accuracy: float | None = None
     mmlu_pro_ci: tuple[float, float] | None = None
+    mmlu_pro_categories: dict[str, tuple[float, tuple[float, float]]] | None = None
     gpqa_accuracy: float | None = None
     gpqa_ci: tuple[float, float] | None = None

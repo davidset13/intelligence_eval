@@ -32,6 +32,7 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         answer_type = str(row["answer_type"])
         correct_answer = str(row["answer"])
         category = str(row["category"])
+        
         if image != "nan":
             if not images_enabled:
                 return None
