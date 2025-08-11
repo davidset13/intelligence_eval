@@ -3,13 +3,16 @@
 * There are thousands of agents on the market today, and their intelligence ability is greatly determined by its prompting, tool usage, and RAG systems.
 * For instance, community testers have determined that o4-mini scores twice as well on traditional intelligence benchmarks (HLE being most notable) with deep research pipelines enabled.
 * This open-source project is my agentic intellect evaluation, feel free to plug your own agent into it and test yourself!
-* More benchmarks will be added to the future, only HLE and MMLU-Pro supported for now, which measure intellect, but future versions will have more benchmarks as well as benchmarks that venture beyond just intellect (such as GAIA).
+* More benchmarks will be added to the future, currently this server only supports intelligence benchmarks, but future versions will have more benchmarks as well as benchmarks that venture beyond just intellect (such as GAIA).
 
 ## Currently Supported Bechmarks:
 
 [Humanity's Last Exam (HLE)](https://agi.safe.ai/)
 
 [Massive Multitask Language Understanding Pro (MMLU-Pro)](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
+
+[Graduate-Level Google-Proof Q&A (GPQA)](https://huggingface.co/datasets/Idavidrein/gpqa)
+    - Note: This server uses the diamond subset of the GPQA, or GPQA-Diamond
 
 ## IMPORTANT
 
@@ -99,7 +102,7 @@ resp = requests.post("http://127.0.0.1:3000/llm/general", json={"agent_name": "t
 
 ## Changing Margin of Error
 
-* Open `intelligence_server.py` and go to line 43 (HLE), 48 (MMLU-Pro)
+* Open `intelligence_server.py`
 * Change the parameter `eps` to something other than 0.04 (default).
 * The greater the margin of error, the less accurate the results, but fewer questions are used as input
 
