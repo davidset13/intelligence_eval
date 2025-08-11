@@ -98,7 +98,7 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         return None
 
 
-async def hle_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, hle_dataset: pd.DataFrame, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool) -> dict[str, float | tuple[float, float] | None] | None:
+async def hle_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, hle_dataset: pd.DataFrame, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool, total_dataset_size: int) -> dict[str, float | tuple[float, float] | None] | None:
     
     try:
         time_start = time.time()
@@ -123,7 +123,7 @@ async def hle_scoring(openrouter_key: str, agent_url: str, agent_params: dict[An
         logger.info(f"Accuracy: {accuracy}")
         logger.info(f"Successful Results: {total_success}")
         logger.info(f"Total Results: {total_results}")
-        hle_ci = Wald_CI("bernoulli", 2500, total_results, accuracy)
+        hle_ci = Wald_CI("bernoulli", total_dataset_size, total_results, accuracy)
         resp_dict = {"hle_accuracy": round(accuracy, 4), "hle_ci": hle_ci}
     except ZeroDivisionError:
         logger.info("No results found. Invalid LLM calls.")

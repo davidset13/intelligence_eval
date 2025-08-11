@@ -54,7 +54,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
 
         hle_dataset, _ = train_test_split(hle_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_mod), eps = 0.04), stratify = hle_dataset_mod["category"], random_state = None)
         hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
-        async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled))
+        async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled, len(hle_dataset_mod)))
     
     if payload.mmlu_pro:
         if payload.mmlu_pro_categories == ["all"]:
@@ -66,7 +66,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
 
         mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_mod), eps = 0.04), stratify = mmlu_pro_dataset_mod["category"], random_state = None)
         mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
-        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name))
+        async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name, len(mmlu_pro_dataset_mod)))
 
     if payload.gpqa:
         gpqa_dataset, _ = train_test_split(gpqa_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(gpqa_dataset_full), eps = 0.04), random_state = None)

@@ -96,7 +96,7 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
         return None
 
 
-async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, mmlu_pro_dataset: pd.DataFrame, prompt_param_name: Any) -> dict[str, float | tuple[float, float] | None] | None:
+async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, mmlu_pro_dataset: pd.DataFrame, prompt_param_name: Any, total_dataset_size: int) -> dict[str, float | tuple[float, float] | None] | None:
 
     try:
         time_start = time.time()
@@ -121,7 +121,7 @@ async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: di
         logger.info(f"Accuracy: {accuracy}")
         logger.info(f"Successful Results: {total_success}")
         logger.info(f"Total Results: {total_results}")
-        mmlu_pro_ci = Wald_CI("bernoulli", 12032, total_results, accuracy)
+        mmlu_pro_ci = Wald_CI("bernoulli", total_dataset_size, total_results, accuracy)
         resp_dict = {"mmlu_pro_accuracy": round(accuracy, 4), "mmlu_pro_ci": mmlu_pro_ci}
     except ZeroDivisionError:
         logger.info("No results found. Invalid LLM calls.")
