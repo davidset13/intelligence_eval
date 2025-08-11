@@ -66,7 +66,28 @@ python3 tests/test_agent_srv.py # MacOS/Linux
 ```python
 import requests # No need for asynchronous calls, that is handled internally.
 
-resp = requests.post("http://127.0.0.1:3000/llm/general", json={"agent_name": "test_agent", "agent_url": "http://127.0.0.1:8000/test_agent", "agent_params": {"model": "google/gemini-flash-1.5-8b", "prompt": "Unimportant", "image_enabled": True, "image": None, "output_type": None}, "prompt_param_name": "prompt", "image_param_name": "image", "hle": True, "mmlu_pro": True, "images_enabled": False})
+response = requests.post(
+    "http://127.0.0.1:3000/llm/general", 
+    json={
+        "agent_name": "test_agent",
+        "agent_url": "http://127.0.0.1:8000/test_agent",
+        "agent_params": {
+            "model": "google/gemini-flash-1.5-8b",
+            "prompt": "Unimportant",
+            "image_enabled": True,
+            "image": None,
+            "output_type": None
+        }, 
+        "prompt_param_name": "prompt",
+        "image_param_name": "image",
+        "hle": True,
+        "hle_categories": ["math", "computer_science"],
+        "mmlu_pro": True, 
+        "mmlu_pro_categories": ["math", "physics"],
+        "gpqa": False, 
+        "images_enabled": True
+    }
+)
 ```
 
 ## Payload Params Explanation
@@ -96,9 +117,21 @@ resp = requests.post("http://127.0.0.1:3000/llm/general", json={"agent_name": "t
 
     - `hle`: If True, the intelligence server will create an evaluation of Humanity's Last Exam (HLE).
         - Type: Boolean
+
+    - `hle_categories`: Optional parameter to select categories. If not selected, will evaluate all. Otherwise, choose any subset of valid categories, and only these will be evaluated.
+        - Type: List[str]
+            - Valid Categories: ("math", "biology", "computer_science", "other", "physics", "humanities", "chemistry", "engineering")
     
     - `mmlu_pro`: If True, the intelligence server will create an evaluation of Massive Multitask Language Understadning Pro (MMLU-Pro).
         - Type: Boolean
+
+    - `mmlu_pro_categories`: Optional parameter to select categories. If not selected, will evaluate all. Otherwise, choose any subset of valid categories, and only these will be evaluated.
+        - Type: List[str]
+            - Valid Categories: ("math", "physics", "chemistry", "law", "engineering", "other", "economics", "health", "psychology", "business", "biology", "philosophy", "computer science", "history")
+    
+    - `gpqa`: If True, the intelligence server will create an evaluation of GPQA Diamond.
+        - Type: Boolean
+
 
 ## Changing Margin of Error
 
