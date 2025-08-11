@@ -12,14 +12,14 @@ import copy
 from collections import defaultdict
 
 value_counts = {
-    "Math": 1021,
-    "Biology/Medicine": 280,
-    "Computer Science/AI": 241,
-    "Other": 233,
-    "Physics": 230,
-    "Humanities/Social Science": 219,
-    "Chemistry": 165,
-    "Engineering": 111
+    "MAT": 1021,
+    "BIO": 280,
+    "COM": 241,
+    "OTH": 233,
+    "PHY": 230,
+    "HUM": 219,
+    "CHE": 165,
+    "ENG": 111
 }
 
 async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, hle_sys_prompt_mc: str, hle_sys_prompt_ex: str, prompt_param_name: Any, image_param_name: Any, images_enabled: bool) -> tuple[bool, str] | None:

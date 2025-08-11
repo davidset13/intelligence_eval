@@ -40,14 +40,31 @@ hle_app = FastAPI()
 @hle_app.post("/llm/general")
 async def general_llm_eval(payload: IntelligenceEvalInput):
     async_tasks: list[Coroutine[Any, Any, dict[str, float | tuple[float, float] | None] | None]] = []
-
+    
     if payload.hle:
-        hle_dataset, _ = train_test_split(hle_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_full), eps = 0.04), stratify = hle_dataset_full["category"], random_state = None)
+        if payload.hle_categories == ["all"]:
+            hle_dataset_mod = hle_dataset_full
+        else:
+            hle_dataset_mod = pd.DataFrame()
+            for category in payload.hle_categories:
+                hle_dataset_mod = pd.concat([hle_dataset_mod, hle_dataset_full[hle_dataset_full["category"] == category]])
+        
+        if not payload.images_enabled:
+            hle_dataset_mod = hle_dataset_mod[hle_dataset_mod["image"].isna()]
+
+        hle_dataset, _ = train_test_split(hle_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_mod), eps = 0.04), stratify = hle_dataset_mod["category"], random_state = None)
         hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
         async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled))
     
     if payload.mmlu_pro:
-        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_full), eps = 0.04), stratify = mmlu_pro_dataset_full["category"], random_state = None)
+        if payload.mmlu_pro_categories == ["all"]:
+            mmlu_pro_dataset_mod = mmlu_pro_dataset_full
+        else:
+            mmlu_pro_dataset_mod = pd.DataFrame()
+            for category in payload.mmlu_pro_categories:
+                mmlu_pro_dataset_mod = pd.concat([mmlu_pro_dataset_mod, mmlu_pro_dataset_full[mmlu_pro_dataset_full["category"] == category]])
+
+        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_mod), eps = 0.04), stratify = mmlu_pro_dataset_mod["category"], random_state = None)
         mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
         async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name))
 
@@ -73,7 +90,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
 
 if __name__ == "__main__":
     try:
-        logger.info("HLE Server Starting...")
+        logger.info("Intelligence Server Starting...")
         uvicorn.run(hle_app, host="127.0.0.1", port=3000, log_level="info")
     except Exception as e:
         logger.error(f"Error in HLE Server: {e}")

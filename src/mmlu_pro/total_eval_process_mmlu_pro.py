@@ -12,20 +12,20 @@ import copy
 from collections import defaultdict
 
 value_counts = {
-    "math": 1351,
-    "physics": 1299,
-    "chemistry": 1132,
-    "law": 1101,
-    "engineering": 969,
-    "other": 924,
-    "economics": 844,
-    "health": 818,
-    "psychology": 798,
-    "business": 789,
-    "biology": 717,
-    "philosophy": 499,
-    "computer science": 410,
-    "history": 381
+    "MAT": 1351,
+    "PHY": 1299,
+    "CHE": 1132,
+    "LAW": 1101,
+    "ENG": 969,
+    "OTH": 924,
+    "ECO": 844,
+    "HEA": 818,
+    "PSY": 798,
+    "BUS": 789,
+    "BIO": 717,
+    "PHI": 499,
+    "COM": 410,
+    "HIS": 381
 }
 
 

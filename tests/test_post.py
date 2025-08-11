@@ -14,8 +14,10 @@ response = requests.post(
         }, 
         "prompt_param_name": "prompt",
         "image_param_name": "image",
-        "hle": True, 
+        "hle": True,
+        "hle_categories": ["math", "computer_science"],
         "mmlu_pro": True, 
+        "mmlu_pro_categories": ["math", "physics"],
         "gpqa": False, 
         "images_enabled": True
     }

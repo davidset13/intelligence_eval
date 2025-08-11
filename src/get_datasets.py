@@ -31,14 +31,16 @@ async def main() -> None:
     args: list[tuple[list[str], str]] = [
         (
             [
-                "hle_dataset = pd.read_parquet('hf://datasets/cais/hle/data/test-00000-of-00001.parquet')"
+                "hle_dataset = pd.read_parquet('hf://datasets/cais/hle/data/test-00000-of-00001.parquet')",
+                "hle_dataset['category'] = hle_dataset['category'].map(lambda x: x[:3].upper())"
             ],
             "hle_dataset"
         ),
         (
             [
                 "splits = {'test': 'data/test-00000-of-00001.parquet', 'validation': 'data/validation-00000-of-00001.parquet'}",
-                "mmlu_pro_dataset = pd.read_parquet('hf://datasets/TIGER-Lab/MMLU-Pro/' + splits['test'])"
+                "mmlu_pro_dataset = pd.read_parquet('hf://datasets/TIGER-Lab/MMLU-Pro/' + splits['test'])",
+                "mmlu_pro_dataset['category'] = mmlu_pro_dataset['category'].map(lambda x: x[:3].upper())"
             ],
             "mmlu_pro_dataset"
         ),
