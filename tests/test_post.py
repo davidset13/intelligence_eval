@@ -22,5 +22,3 @@ response = requests.post(
         "images_enabled": True
     }
 )
-
-print(response.json())
