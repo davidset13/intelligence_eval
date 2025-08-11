@@ -35,7 +35,7 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         
         if image != "nan":
             if not images_enabled:
-                return None
+                raise ValueError("Images are disabled, yet image is provided")
             agent_params_copy[image_param_name] = image
         if answer_type == "multiple_choice":
             agent_params_copy[prompt_param_name] = hle_sys_prompt_mc + "\n\n" + question
