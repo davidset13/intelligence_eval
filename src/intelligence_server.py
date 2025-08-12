@@ -23,7 +23,7 @@ logger = get_logger("intelligence_server")
 hle_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "hle_dataset.csv"))
 mmlu_pro_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "mmlu_pro_dataset.csv"))
 gpqa_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "gpqa_dataset.csv"))
-livebench_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "livebench_dataset_gen.csv"))
+livebench_dataset_full: pd.DataFrame = pd.read_csv(os.path.join(os.getcwd(), "utility", "livebench_dataset.csv"))
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")

@@ -1,3 +1,4 @@
+from selectors import EpollSelector
 import requests
 
 from intelligence_server import livebench_dataset_full
@@ -26,10 +27,4 @@ response = requests.post(
         "images_enabled": True
     }
 )
-
-
-
-
-
-
 

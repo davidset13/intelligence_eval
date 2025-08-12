@@ -12,8 +12,9 @@ import copy
 from collections import defaultdict
 
 value_counts = {
+    "INS": 200,
     "DAT": 150,
-    "REA": 100
+    "REA": 100,
 }
 
 async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> tuple[bool, str] | None:
