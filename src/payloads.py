@@ -13,6 +13,8 @@ class IntelligenceEvalInput(BaseModel):
     mmlu_pro: bool = False
     mmlu_pro_categories: list[str] = ["all"]
     gpqa: bool = False
+    livebench: bool = False
+    livebench_categories: list[str] = ["all"]
     images_enabled: bool = True
     @field_validator("hle_categories")
     @classmethod
@@ -38,8 +40,18 @@ class IntelligenceEvalInput(BaseModel):
                 if category not in ("math", "physics", "chemistry", "law", "engineering", "other", "economics", "health", "psychology", "business", "biology", "philosophy", "computer science", "history"):
                     raise ValueError(f"Invalid category: {category}")
             return [cat[:3].upper() for cat in v]
-
-
+    @field_validator("livebench_categories")
+    @classmethod
+    def check_livebench_categories(cls, v: list[str]) -> list[str]:
+        if "all" in v:
+            return ["all"]
+        elif len(v) == 0:
+            raise ValueError("mmlu_pro_categories must be a non-empty list")
+        else:
+            for category in v:
+                if category not in ("reasoning", "data_analysis"):
+                    raise ValueError(f"Invalid category: {category}")
+            return [cat[:3].upper() for cat in v]
 
 
 class IntelligenceEvalOutput(BaseModel):
@@ -52,3 +64,6 @@ class IntelligenceEvalOutput(BaseModel):
     mmlu_pro_categories: dict[str, tuple[float, tuple[float, float]]] | None = None
     gpqa_accuracy: float | None = None
     gpqa_ci: tuple[float, float] | None = None
+    livebench_accuracy: float | None = None
+    livebench_ci: tuple[float, float] | None = None
+    livebench_categories: dict[str, tuple[float, tuple[float, float]]] | None = None

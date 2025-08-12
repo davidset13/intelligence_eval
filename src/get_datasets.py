@@ -58,6 +58,9 @@ async def main() -> None:
                 "reasoning = pd.read_parquet('hf://datasets/livebench/reasoning/data/test-00000-of-00001.parquet')",
                 "data_analysis = pd.read_parquet('hf://datasets/livebench/data_analysis/data/test-00000-of-00001.parquet')",
                 "livebench_dataset_gen = pd.concat([reasoning, data_analysis], ignore_index=True)",
+                "livebench_dataset_gen = livebench_dataset_gen.loc[livebench_dataset_gen['livebench_removal_date'].str.len() == 0]",
+                "livebench_dataset_gen['category'] = livebench_dataset_gen['category'].map(lambda x: x[:3].upper())",
+                "livebench_dataset_gen = livebench_dataset_gen[['turns', 'ground_truth', 'category']]"
             ],
             "livebench_dataset_gen"
         ),

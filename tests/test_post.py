@@ -1,5 +1,7 @@
 import requests
 
+from intelligence_server import livebench_dataset_full
+
 response = requests.post(
     "http://127.0.0.1:3000/llm/general", 
     json={
@@ -18,8 +20,16 @@ response = requests.post(
         "hle_categories": ["math", "computer_science"],
         "mmlu_pro": True, 
         "mmlu_pro_categories": ["math", "physics"],
-        "gpqa": True, 
+        "gpqa": True,
+        "livebench": True,
+        "livebench_categories": ["reasoning", "data_analysis"],
         "images_enabled": True
     }
 )
+
+
+
+
+
+
 
