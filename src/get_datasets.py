@@ -32,7 +32,8 @@ async def main() -> None:
         (
             [
                 "hle_dataset = pd.read_parquet('hf://datasets/cais/hle/data/test-00000-of-00001.parquet')",
-                "hle_dataset['category'] = hle_dataset['category'].map(lambda x: x[:3].upper())"
+                "hle_dataset['category'] = hle_dataset['category'].map(lambda x: x[:3].upper())",
+                "hle_dataset = hle_dataset[['question', 'image', 'answer_type', 'answer', 'category']]"
             ],
             "hle_dataset"
         ),
@@ -40,13 +41,15 @@ async def main() -> None:
             [
                 "splits = {'test': 'data/test-00000-of-00001.parquet', 'validation': 'data/validation-00000-of-00001.parquet'}",
                 "mmlu_pro_dataset = pd.read_parquet('hf://datasets/TIGER-Lab/MMLU-Pro/' + splits['test'])",
-                "mmlu_pro_dataset['category'] = mmlu_pro_dataset['category'].map(lambda x: x[:3].upper())"
+                "mmlu_pro_dataset['category'] = mmlu_pro_dataset['category'].map(lambda x: x[:3].upper())",
+                "mmlu_pro_dataset = mmlu_pro_dataset[['question', 'options', 'answer', 'category']]"
             ],
             "mmlu_pro_dataset"
         ),
         (
             [
-                "gpqa_dataset = pd.read_csv('hf://datasets/Idavidrein/gpqa/gpqa_diamond.csv')"
+                "gpqa_dataset = pd.read_csv('hf://datasets/Idavidrein/gpqa/gpqa_diamond.csv')",
+                "gpqa_dataset = gpqa_dataset[['Question', 'Correct Answer', 'Incorrect Answer 1', 'Incorrect Answer 2', 'Incorrect Answer 3']]"
             ],
             "gpqa_dataset"
         ),

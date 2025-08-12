@@ -71,7 +71,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
     if payload.gpqa:
         gpqa_dataset, _ = train_test_split(gpqa_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(gpqa_dataset_full), eps = 0.04), random_state = None)
         gpqa_dataset = pd.DataFrame(gpqa_dataset, columns=gpqa_dataset_full.columns)
-        async_tasks.append(gpqa_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", gpqa_dataset, payload.prompt_param_name))
+        async_tasks.append(gpqa_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", gpqa_dataset, payload.prompt_param_name, len(gpqa_dataset_full)))
     
     try:
         results = await asyncio.gather(*async_tasks)

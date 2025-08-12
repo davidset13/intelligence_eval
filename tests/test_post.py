@@ -18,7 +18,8 @@ response = requests.post(
         "hle_categories": ["math", "computer_science"],
         "mmlu_pro": True, 
         "mmlu_pro_categories": ["math", "physics"],
-        "gpqa": False, 
+        "gpqa": True, 
         "images_enabled": True
     }
 )
+

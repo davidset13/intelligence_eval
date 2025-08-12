@@ -86,7 +86,7 @@ async def init_call_gpqa(openrouter_key: str, agent_url: str, agent_params: dict
         return None
 
 
-async def gpqa_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, gpqa_dataset: pd.DataFrame, prompt_param_name: Any) -> dict[str, float | tuple[float, float] | None] | None:
+async def gpqa_scoring(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, gpqa_dataset: pd.DataFrame, prompt_param_name: Any, total_dataset_size: int) -> dict[str, float | tuple[float, float] | None] | None:
     
     try:
         time_start = time.time()
@@ -111,7 +111,7 @@ async def gpqa_scoring(openrouter_key: str, agent_url: str, agent_params: dict[A
         logger.info("No results found. Invalid LLM calls.")
         return
     
-    gpqa_ci = Wald_CI("bernoulli", 198, total_results, accuracy)
+    gpqa_ci = Wald_CI("bernoulli", total_dataset_size, total_results, accuracy)
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
