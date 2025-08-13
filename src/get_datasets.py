@@ -59,7 +59,8 @@ async def main() -> None:
                 "data_analysis = pd.read_parquet('hf://datasets/livebench/data_analysis/data/test-00000-of-00001.parquet')",
                 "instruction_following = pd.read_parquet('hf://datasets/livebench/instruction_following/data/test-00000-of-00001.parquet')",
                 "math = pd.read_parquet('hf://datasets/livebench/math/data/test-00000-of-00001.parquet')",
-                "livebench_dataset = pd.concat([reasoning, data_analysis, instruction_following, math], ignore_index=True)",
+                "language = pd.read_parquet('hf://datasets/livebench/language/data/test-00000-of-00001.parquet')",
+                "livebench_dataset = pd.concat([reasoning, data_analysis, instruction_following, math, language], ignore_index=True)",
                 "livebench_dataset = livebench_dataset.loc[livebench_dataset['livebench_removal_date'].str.len() == 0]",
                 "livebench_dataset['category'] = livebench_dataset['category'].map(lambda x: x[:3].upper())",
                 "livebench_dataset = livebench_dataset[['turns', 'ground_truth', 'category', 'task_prompt']]"

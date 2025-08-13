@@ -17,19 +17,21 @@ value_counts = {
     "MAT": 182,
     "DAT": 150,
     "REA": 100,
+    "LAN": 50
 }
 
 async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> tuple[bool | float, str] | None:
+    
     try:
         agent_params_copy = copy.deepcopy(agent_params)
 
         func_args = {}
         category = str(row["category"])
-        if category == "REA" or category == "DAT" or category == "MAT":
+        if category != "INS":
             func_args["question"] = str(row["turns"])
             func_args["correct_answer"] = str(row["ground_truth"])
             agent_params_copy[prompt_param_name] = f"Question: {func_args["question"]}"
-        elif category == "INS":
+        else:
             func_args["task"] = str(row["task_prompt"])
             func_args["input_text"] = str(row["turns"])
             agent_params_copy[prompt_param_name] = f"Task: {func_args["task"]} \n\n Input Text: {func_args["input_text"]}"
@@ -47,10 +49,10 @@ async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params:
         if not response_eval["success"] or response_eval["content"] is None:
             return None
         else:
-            if category == "REA" or category == "DAT" or category == "MAT":
+            if category != "INS":
                 correct = parse_eval_json(response_eval["content"])
                 return correct, category
-            elif category == "INS":
+            else:
                 correct = eval_livebench_if(response_eval["content"])
                 return correct, category
     except Exception as e:

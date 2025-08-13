@@ -2,16 +2,14 @@ from typing import Any
 
 
 def create_livebench_score_payload(model: str, category: str, response: str, question: str | None = None, correct_answer: str | None = None, input_text: str | None = None, task: str | None = None) -> dict[str, Any]:
-    if category == "REA" or category == "DAT" or category == "MAT":
+    if category != "INS":
         if not question or not correct_answer:
             raise ValueError("question and correct_answer must be provided for reasoning and data analysis")
         return create_livebench_score_payload_gt(model, question, correct_answer, response)
-    elif category == "INS":
+    else:
         if not task or not input_text:
             raise ValueError("task and input_text must be provided for instruction following")
         return create_livebench_score_payload_if(model, task, input_text, response)
-    else:
-        raise ValueError(f"Invalid category: {category}")
 
 
 def create_livebench_score_payload_gt(model: str, question: str, correct_answer: str, response: str) -> dict[str, Any]:
