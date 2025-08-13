@@ -49,7 +49,7 @@ class IntelligenceEvalInput(BaseModel):
             raise ValueError("mmlu_pro_categories must be a non-empty list")
         else:
             for category in v:
-                if category not in ("reasoning", "data_analysis"):
+                if category not in ("reasoning", "data_analysis", "instruction_following"):
                     raise ValueError(f"Invalid category: {category}")
             return [cat[:3].upper() for cat in v]
 

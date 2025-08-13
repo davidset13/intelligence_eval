@@ -6,10 +6,6 @@ def create_mmlu_pro_score_payload(model: str, question: str, correct_answer: str
         "model": model,
         "messages": [
             {
-                "role": "system",
-                "content": "Return your response as as JSON object, with keys 'extracted_final_answer', 'reasoning', 'correct', and 'confidence'."
-            },
-            {
                 "role": "user",
                 "content": f"""
                             Judge whether the following [response] to [question] is correct or not
@@ -22,6 +18,8 @@ def create_mmlu_pro_score_payload(model: str, question: str, correct_answer: str
                             [response]: {response}
 
                             Your judgement must be in the format and criteria specified below:
+
+                            You will output a JSON with this key:
 
                             [correct_answer]: {correct_answer}
 

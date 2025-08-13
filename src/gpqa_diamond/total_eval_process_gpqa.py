@@ -10,7 +10,7 @@ from math_evals.MLE import Wald_CI
 import requests
 import copy
 import random
-
+from eval_json_parser import parse_eval_json
 
 async def init_call_gpqa(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> bool | None:
     try:
@@ -44,43 +44,9 @@ async def init_call_gpqa(openrouter_key: str, agent_url: str, agent_params: dict
         if not response_eval["success"] or response_eval["content"] is None:
             return None
         else:
-            try:
-                correct = ast.literal_eval(response_eval["content"])['correct']
-                if correct == 'yes':
-                    return True
-                else:
-                    return False
-            except:
-                try:
-                    if ('"correct":' in response_eval["content"] or "'correct':" in response_eval["content"]):
-                        idx1 = response_eval["content"].find('"correct":')
-                        idx2 = response_eval["content"].find("'correct':")
-                        if idx1 != -1 and idx2 != -1:
-                            return False
-                        elif idx1 != -1:
-                            if_yes = response_eval["content"][idx1:].find('yes')
-                            if_no = response_eval["content"][idx1:].find('no')
-                            if if_yes == -1:
-                                return False
-                            elif if_yes < if_no:
-                                return True
-                            else:
-                                return False
-                        elif idx2 != -1:
-                            if_yes = response_eval["content"][idx2:].find('yes')
-                            if_no = response_eval["content"][idx2:].find('no')
-                            if if_yes == -1:
-                                return False
-                            elif if_yes < if_no:
-                                return True
-                            else:
-                                return False
-                        else:
-                            return False
-                    else:
-                        return False
-                except:
-                    return False
+            correct = parse_eval_json(response_eval["content"])
+        
+        return correct
     except Exception as e:
         logger.error(f"Error Evaluating Agent: {e}")
         return None

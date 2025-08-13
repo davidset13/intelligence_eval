@@ -7,10 +7,6 @@ def create_hle_score_payload(model: str, question: str, correct_answer: str, res
         "model": model,
         "messages": [
             {
-                "role": "system",
-                "content": "Return your response as as JSON object, with keys 'extracted_final_answer', 'reasoning', 'correct', and 'confidence'."
-            },
-            {
                 "role": "user",
                 "content": f"""
                             Judge whether the following [response] to [question] is correct or not
@@ -27,6 +23,8 @@ def create_hle_score_payload(model: str, question: str, correct_answer: str, res
                             from the response.
 
                             [correct_answer]: {correct_answer}
+
+                            You will output a JSON with these keys:
 
                             reasoning: Explain why the extracted_final_answer is correct or incorrect
                             based on [correct_answer], focusing only on if there are meaningful differences

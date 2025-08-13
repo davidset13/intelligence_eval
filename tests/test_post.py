@@ -1,7 +1,4 @@
-from selectors import EpollSelector
 import requests
-
-from intelligence_server import livebench_dataset_full
 
 response = requests.post(
     "http://127.0.0.1:3000/llm/general", 
@@ -18,13 +15,14 @@ response = requests.post(
         "prompt_param_name": "prompt",
         "image_param_name": "image",
         "hle": True,
-        "hle_categories": ["math", "computer_science"],
+        "hle_categories": ["all"],
         "mmlu_pro": True, 
-        "mmlu_pro_categories": ["math", "physics"],
+        "mmlu_pro_categories": ["all"],
         "gpqa": True,
         "livebench": True,
-        "livebench_categories": ["reasoning", "data_analysis"],
+        "livebench_categories": ["all"],
         "images_enabled": True
     }
 )
 
+print(response.json())
