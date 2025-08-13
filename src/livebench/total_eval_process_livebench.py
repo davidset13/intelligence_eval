@@ -14,6 +14,7 @@ from eval_json_parser import parse_eval_json, eval_livebench_if
 
 value_counts = {
     "INS": 200,
+    "MAT": 182,
     "DAT": 150,
     "REA": 100,
 }
@@ -24,7 +25,7 @@ async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params:
 
         func_args = {}
         category = str(row["category"])
-        if category == "REA" or category == "DAT":
+        if category == "REA" or category == "DAT" or category == "MAT":
             func_args["question"] = str(row["turns"])
             func_args["correct_answer"] = str(row["ground_truth"])
             agent_params_copy[prompt_param_name] = f"Question: {func_args["question"]}"
@@ -46,7 +47,7 @@ async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params:
         if not response_eval["success"] or response_eval["content"] is None:
             return None
         else:
-            if category == "REA" or category == "DAT":
+            if category == "REA" or category == "DAT" or category == "MAT":
                 correct = parse_eval_json(response_eval["content"])
                 return correct, category
             elif category == "INS":

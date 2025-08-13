@@ -2,7 +2,7 @@ from typing import Any
 
 
 def create_livebench_score_payload(model: str, category: str, response: str, question: str | None = None, correct_answer: str | None = None, input_text: str | None = None, task: str | None = None) -> dict[str, Any]:
-    if category == "REA" or category == "DAT":
+    if category == "REA" or category == "DAT" or category == "MAT":
         if not question or not correct_answer:
             raise ValueError("question and correct_answer must be provided for reasoning and data analysis")
         return create_livebench_score_payload_gt(model, question, correct_answer, response)
