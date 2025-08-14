@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import asyncio
+from datasets import load_dataset
 
 
 def os_flush(name: str, dataset: pd.DataFrame) -> None:
@@ -17,7 +18,7 @@ def download_dataset(scripts: list[str], name: str) -> None:
     
     ns = {}
     code = "\n".join(scripts)
-    exec(code, {"pd": pd}, ns)
+    exec(code, {"pd": pd, "load_dataset": load_dataset}, ns)
 
     df = ns.get(name)
     if isinstance(df, pd.DataFrame):
@@ -67,6 +68,14 @@ async def main() -> None:
             ],
             "livebench_dataset"
         ),
+        (
+            [
+                "livecodebench_dataset = load_dataset('livecodebench/code_generation_lite', version_tag='release_v6', trust_remote_code=True)",
+                "livecodebench_dataset = livecodebench_dataset['test']",
+                "livecodebench_dataset = livecodebench_dataset.to_pandas()"
+            ],
+            "livecodebench_dataset"
+        )
     ]
 
 
