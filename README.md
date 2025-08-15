@@ -14,9 +14,15 @@
 [Graduate-Level Google-Proof Q&A (GPQA)](https://huggingface.co/datasets/Idavidrein/gpqa)
     - Note: This server uses the diamond subset of the GPQA, or GPQA-Diamond
 
+[LiveBench](https://livebench.ai/#/)
+
 ## IMPORTANT
 
 * Make sure to follow proper protocol when using these datasets. Do not post them online or else they will become training data for future LLMs. Adhere to any HuggingFace protocols and terms of service when using.
+
+* This project is designed to allow people to test agents that they have desinged (essentially, that they have an endpoint for). If you would like to use this repo to test a released proprietary agent (ChatGPT, Claude Desktop, etc.), make sure to follow proper guidelines.
+
+* If you do want to test proprietary agents that you do not own, and intend to use something like Puppeteer to create an endpoint for the data, make sure to abide by any licensing.
 
 ## Setup
 ```bash
@@ -49,7 +55,6 @@ cp template.private.env
 * Create a new file called .private.env and insert your API keys
 * This project supports openrouter clients, but this can easily be modified to support other providers
 
-
 ## Testing
 
 * A simple testing_agent is created under `test_agent_srv.py` and a sample call exists in `test_post.py`
@@ -73,7 +78,7 @@ response = requests.post(
         "agent_url": "http://127.0.0.1:8000/test_agent",
         "agent_params": {
             "model": "google/gemini-flash-1.5-8b",
-            "prompt": "Unimportant",
+            "prompt": "Unimportant", # The agent manually inserts prompts, whatever you include here is arbitrary
             "image_enabled": True,
             "image": None,
             "output_type": None
@@ -84,7 +89,9 @@ response = requests.post(
         "hle_categories": ["math", "computer_science"],
         "mmlu_pro": True, 
         "mmlu_pro_categories": ["math", "physics"],
-        "gpqa": False, 
+        "gpqa": True,
+        "livebench": True,
+        "livebench_categories": ["all"]
         "images_enabled": True
     }
 )
@@ -131,6 +138,13 @@ response = requests.post(
     
     - `gpqa`: If True, the intelligence server will create an evaluation of GPQA Diamond.
         - Type: Boolean
+     
+    - `livebench`: If True, the intelligence server will create an evaluation of LiveBench.
+        - Type: Boolean
+
+    - `livebench_categories`: Optional parameter to select categories. If not seleected, will evaluate all. Otherwise choose any subset of valid categories, and only these will be evaluated.
+        - Type: List[str]
+            - Valid Categories: ("reasoning", "data_analysis", "instruction_following", "math", "language")
 
 
 ## Changing Margin of Error
