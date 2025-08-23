@@ -40,11 +40,6 @@ async function ReturnResponse(frame: Frame) {
     const text_div = "div.markdown.prose"
 
     try {
-        console.log("Frames on page", frame.url());
-        await Promise.race([
-            frame.waitForNavigation({ waitUntil: "networkidle0"}).catch(() => {}),
-            frame.waitForFunction(() => document.readyState === "complete").catch(() => {}),
-        ])
         await frame.waitForSelector(button_to_find, { visible: true, timeout: 0});
         await frame.waitForSelector(text_div, { visible: true, timeout: 10000});
         const blocks = await frame.$eval(text_div, (container) => {

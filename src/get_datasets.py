@@ -29,6 +29,9 @@ def download_dataset(scripts: list[str], name: str) -> None:
 
 
 async def main() -> None:
+    if not os.path.exists(os.path.join(os.getcwd(), "utility")):
+        os.makedirs(os.path.join(os.getcwd(), "utility"))
+    
     args: list[tuple[list[str], str]] = [
         (
             [
@@ -68,14 +71,6 @@ async def main() -> None:
             ],
             "livebench_dataset"
         ),
-        (
-            [
-                "livecodebench_dataset = load_dataset('livecodebench/code_generation_lite', version_tag='release_v6', trust_remote_code=True)",
-                "livecodebench_dataset = livecodebench_dataset['test']",
-                "livecodebench_dataset = livecodebench_dataset.to_pandas()"
-            ],
-            "livecodebench_dataset"
-        )
     ]
 
 

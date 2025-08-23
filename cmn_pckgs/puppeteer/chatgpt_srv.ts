@@ -32,7 +32,6 @@ const browser = await pp.launch({
 let page_name = "https://chatgpt.com/";
 switch (model) {
     case "GPT-5-FAST":
-        
         page_name = page_name + "?model=gpt-5-instant";
         break;
     case "GPT-4o":
