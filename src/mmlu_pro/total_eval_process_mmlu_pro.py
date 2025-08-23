@@ -1,5 +1,4 @@
 import asyncio
-import ast
 import pandas as pd
 from logging import Logger
 from async_llm_call import response_generator_openrouter
@@ -10,6 +9,7 @@ from math_evals.MLE import Wald_CI
 import requests
 import copy
 from collections import defaultdict
+from eval_json_parser import parse_eval_json
 
 value_counts = {
     "MAT": 1351,
@@ -38,7 +38,7 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
         correct_answer = str(row["answer"])
         category = str(row["category"])
 
-        agent_params_copy[prompt_param_name] = f"Question: {question} \n\n Options: {options}"
+        agent_params_copy[prompt_param_name] = f"Please keep your response short and concise. Question: {question} \n\n Options: {options}"
         response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
         response_content = response.json()
         if len(response_content) == 0 or response_content is None:
@@ -52,43 +52,7 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
         if not response_eval["success"] or response_eval["content"] is None:
             return None
         else:
-            try:
-                correct = ast.literal_eval(response_eval["content"])['correct']
-                if correct == 'yes':
-                    correct = True
-                else:
-                    correct = False
-            except:
-                try:
-                    if ('"correct":' in response_eval["content"] or "'correct':" in response_eval["content"]):
-                        idx1 = response_eval["content"].find('"correct":')
-                        idx2 = response_eval["content"].find("'correct':")
-                        if idx1 != -1 and idx2 != -1:
-                            correct = False
-                        elif idx1 != -1:
-                            if_yes = response_eval["content"][idx1:].find('yes')
-                            if_no = response_eval["content"][idx1:].find('no')
-                            if if_yes == -1:
-                                correct = False
-                            elif if_yes < if_no:
-                                correct = True
-                            else:
-                                correct = False
-                        elif idx2 != -1:
-                            if_yes = response_eval["content"][idx2:].find('yes')
-                            if_no = response_eval["content"][idx2:].find('no')
-                            if if_yes == -1:
-                                correct = False
-                            elif if_yes < if_no:
-                                correct = True
-                            else:
-                                correct = False
-                        else:
-                            correct = False
-                    else:
-                        correct = False
-                except:
-                    correct = False
+            correct = parse_eval_json(response_eval["content"])
         
         return correct, category
     except Exception as e:

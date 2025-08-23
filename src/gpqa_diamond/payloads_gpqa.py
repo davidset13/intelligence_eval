@@ -6,10 +6,6 @@ def create_gpqa_score_payload(model: str, question: str, correct_answer: str, re
         "model": model,
         "messages": [
             {
-                "role": "system",
-                "content": "Return your response as as JSON object, with keys 'extracted_final_answer', 'reasoning', 'correct', and 'confidence'."
-            },
-            {
                 "role": "user",
                 "content": f"""
                             Judge whether the following [response] to [question] is correct or not
@@ -22,6 +18,8 @@ def create_gpqa_score_payload(model: str, question: str, correct_answer: str, re
                             Your judgement must be in the format and criteria specified below:
 
                             [correct_answer]: {correct_answer}
+
+                            You will output a JSON with this key:
 
                             correct: Answer 'yes' if extracted_final_answer matches the [correct_answer] given
                             above, or is within a small margin of error for the numerical problems. Answer 'no'

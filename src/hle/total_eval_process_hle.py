@@ -1,5 +1,4 @@
 import asyncio
-import ast
 import pandas as pd
 from logging import Logger
 from async_llm_call import response_generator_openrouter
@@ -10,6 +9,9 @@ from math_evals.MLE import Wald_CI
 import requests
 import copy
 from collections import defaultdict
+from eval_json_parser import parse_eval_json
+from payloads import gpt_dataset, gpt_ds_name
+import os
 
 value_counts = {
     "MAT": 1021,
@@ -38,11 +40,16 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
                 raise ValueError("Images are disabled, yet image is provided")
             agent_params_copy[image_param_name] = image
         if answer_type == "multiple_choice":
-            agent_params_copy[prompt_param_name] = hle_sys_prompt_mc + "\n\n" + question
+            agent_params_copy[prompt_param_name] = "Please keep your response short and concise. " + hle_sys_prompt_mc + "\n\n" + question
         else:
-            agent_params_copy[prompt_param_name] = hle_sys_prompt_ex + "\n\n" + question
+            agent_params_copy[prompt_param_name] = "Please keep your response short and concise. " + hle_sys_prompt_ex + "\n\n" + question
         response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
-        response_content = response.json()
+        
+        try:
+            response_content = response.json()
+        except:
+            response_content = response.text
+
         if len(response_content) == 0 or response_content is None:
             return None
     except Exception as e:
@@ -54,43 +61,10 @@ async def init_call_hle(openrouter_key: str, agent_url: str, agent_params: dict[
         if not response_eval["success"] or response_eval["content"] is None:
             return None
         else:
-            try:
-                correct = ast.literal_eval(response_eval["content"])['correct']
-                if correct == 'yes':
-                    correct = True
-                else:
-                    correct = False
-            except:
-                try:
-                    if ('"correct":' in response_eval["content"] or "'correct':" in response_eval["content"]):
-                        idx1 = response_eval["content"].find('"correct":')
-                        idx2 = response_eval["content"].find("'correct':")
-                        if idx1 != -1 and idx2 != -1:
-                            correct = False
-                        elif idx1 != -1:
-                            if_yes = response_eval["content"][idx1:].find('yes')
-                            if_no = response_eval["content"][idx1:].find('no')
-                            if if_yes == -1:
-                                correct = False
-                            elif if_yes < if_no:
-                                correct = True
-                            else:
-                                correct = False
-                        elif idx2 != -1:
-                            if_yes = response_eval["content"][idx2:].find('yes')
-                            if_no = response_eval["content"][idx2:].find('no')
-                            if if_yes == -1:
-                                correct = False
-                            elif if_yes < if_no:
-                                correct = True
-                            else:
-                                correct = False
-                        else:
-                            correct = False
-                    else:
-                        correct = False
-                except:
-                    correct = False
+            correct = parse_eval_json(response_eval["content"])
+        
+        gpt_dataset.loc[len(gpt_dataset)] = [question, category, response_content, correct_answer, correct]
+        logger.info(len(gpt_dataset))
         
         return correct, category
     except Exception as e:
@@ -142,5 +116,7 @@ async def hle_scoring(openrouter_key: str, agent_url: str, agent_params: dict[An
     
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
+
+    gpt_dataset.to_csv(os.path.join(os.getcwd(), "agent_ans", f"{gpt_ds_name}.csv"), encoding="utf-8", index=False)
 
     return resp_dict

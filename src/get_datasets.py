@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import asyncio
+from datasets import load_dataset
 
 
 def os_flush(name: str, dataset: pd.DataFrame) -> None:
@@ -17,7 +18,7 @@ def download_dataset(scripts: list[str], name: str) -> None:
     
     ns = {}
     code = "\n".join(scripts)
-    exec(code, {"pd": pd}, ns)
+    exec(code, {"pd": pd, "load_dataset": load_dataset}, ns)
 
     df = ns.get(name)
     if isinstance(df, pd.DataFrame):
@@ -32,7 +33,8 @@ async def main() -> None:
         (
             [
                 "hle_dataset = pd.read_parquet('hf://datasets/cais/hle/data/test-00000-of-00001.parquet')",
-                "hle_dataset['category'] = hle_dataset['category'].map(lambda x: x[:3].upper())"
+                "hle_dataset['category'] = hle_dataset['category'].map(lambda x: x[:3].upper())",
+                "hle_dataset = hle_dataset[['question', 'image', 'answer_type', 'answer', 'category']]"
             ],
             "hle_dataset"
         ),
@@ -40,13 +42,15 @@ async def main() -> None:
             [
                 "splits = {'test': 'data/test-00000-of-00001.parquet', 'validation': 'data/validation-00000-of-00001.parquet'}",
                 "mmlu_pro_dataset = pd.read_parquet('hf://datasets/TIGER-Lab/MMLU-Pro/' + splits['test'])",
-                "mmlu_pro_dataset['category'] = mmlu_pro_dataset['category'].map(lambda x: x[:3].upper())"
+                "mmlu_pro_dataset['category'] = mmlu_pro_dataset['category'].map(lambda x: x[:3].upper())",
+                "mmlu_pro_dataset = mmlu_pro_dataset[['question', 'options', 'answer', 'category']]"
             ],
             "mmlu_pro_dataset"
         ),
         (
             [
-                "gpqa_dataset = pd.read_csv('hf://datasets/Idavidrein/gpqa/gpqa_diamond.csv')"
+                "gpqa_dataset = pd.read_csv('hf://datasets/Idavidrein/gpqa/gpqa_diamond.csv')",
+                "gpqa_dataset = gpqa_dataset[['Question', 'Correct Answer', 'Incorrect Answer 1', 'Incorrect Answer 2', 'Incorrect Answer 3']]"
             ],
             "gpqa_dataset"
         ),
@@ -54,15 +58,23 @@ async def main() -> None:
             [
                 "reasoning = pd.read_parquet('hf://datasets/livebench/reasoning/data/test-00000-of-00001.parquet')",
                 "data_analysis = pd.read_parquet('hf://datasets/livebench/data_analysis/data/test-00000-of-00001.parquet')",
-                "livebench_dataset_gen = pd.concat([reasoning, data_analysis], ignore_index=True)",
+                "instruction_following = pd.read_parquet('hf://datasets/livebench/instruction_following/data/test-00000-of-00001.parquet')",
+                "math = pd.read_parquet('hf://datasets/livebench/math/data/test-00000-of-00001.parquet')",
+                "language = pd.read_parquet('hf://datasets/livebench/language/data/test-00000-of-00001.parquet')",
+                "livebench_dataset = pd.concat([reasoning, data_analysis, instruction_following, math, language], ignore_index=True)",
+                "livebench_dataset = livebench_dataset.loc[livebench_dataset['livebench_removal_date'].str.len() == 0]",
+                "livebench_dataset['category'] = livebench_dataset['category'].map(lambda x: x[:3].upper())",
+                "livebench_dataset = livebench_dataset[['turns', 'ground_truth', 'category', 'task_prompt']]"
             ],
-            "livebench_dataset_gen"
+            "livebench_dataset"
         ),
         (
             [
-                "livebench_dataset_coding = pd.read_parquet('hf://datasets/livebench/coding/data/test-00000-of-00001.parquet')",
+                "livecodebench_dataset = load_dataset('livecodebench/code_generation_lite', version_tag='release_v6', trust_remote_code=True)",
+                "livecodebench_dataset = livecodebench_dataset['test']",
+                "livecodebench_dataset = livecodebench_dataset.to_pandas()"
             ],
-            "livebench_dataset_coding"
+            "livecodebench_dataset"
         )
     ]
 
