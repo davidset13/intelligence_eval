@@ -1,9 +1,12 @@
 {
   "type": "module",
   "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "clipboardy": "^4.0.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "morgan": "^1.10.1",
