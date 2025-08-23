@@ -8,7 +8,7 @@ import uvicorn
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.async_llm_call import response_generator_openrouter
-from cmn_pckgs.logger import get_logger
+from cmn_pckgs.python.logger import get_logger
 
 if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
     raise FileNotFoundError("Private Environment File Not Found")
