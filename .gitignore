@@ -213,3 +213,5 @@ __marimo__/
 *.csv
 
 node_modules/
+
+profile/
