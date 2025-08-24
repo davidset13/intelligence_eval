@@ -26,6 +26,7 @@ pp.use(StealthPlugin());
 
 const browser = await pp.launch({
     headless: false,
+    protocolTimeout: 0,
 	userDataDir: "./profile",
 });
 
@@ -50,7 +51,7 @@ if (model === "GPT-4o") {
 
     console.log("Frame URL", frame.url());
 
-    await Promise.race([
+    await Promise.all([
         frame.waitForNavigation({ waitUntil: "networkidle0"}).catch(() => {}),
         frame.waitForFunction(() => document.readyState === "complete").catch(() => {}),
     ])

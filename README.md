@@ -26,7 +26,7 @@
 
 ## Setup
 ```bash
-cd intelligence_server
+cd intelligence_eval
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" # Windows
 curl -LsSf https://astral.sh/uv/install.sh | sh # MacOS/Linux
 ```
@@ -42,8 +42,8 @@ uv sync
 python src/get_datasets.py # Windows
 python3 src/get_datasets.py # MacOS/Linux
 
-python src/intelligence_server.py # Windows
-python3 src/intelligence_server.py # MacOS/Linux
+python src/intelligence_srv.py # Windows
+python3 src/intelligence_srv.py # MacOS/Linux
 ```
 
 ## Environment Variables (All Machines)

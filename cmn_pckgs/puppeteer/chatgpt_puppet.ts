@@ -39,6 +39,8 @@ async function ReturnResponse(frame: Frame) {
 
     const text_div = "div.markdown.prose"
 
+    let start = performance.now();
+
     try {
         await frame.waitForSelector(button_to_find, { visible: true, timeout: 0});
         await frame.waitForSelector(text_div, { visible: true, timeout: 10000});
@@ -49,11 +51,14 @@ async function ReturnResponse(frame: Frame) {
             return (nodes.map((node) => (node.textContent?.trim() || ""))).join("\n");
         });
         console.log("Text Evaluated", blocks);
+        console.log("Time taken", performance.now() - start);
         return blocks;
     } catch (err) {
+        console.log("Time taken", performance.now() - start);
         console.log("Error", err);
         throw new Error(err as string);
     }
+
 }
 
 

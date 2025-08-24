@@ -8,7 +8,8 @@ tested the ChatGPT agentic system. I am merely using this README for the sake of
 # Step 1: Start Chromium Puppet Browser
 ```bash
 cd cmn_pckgs/puppeteer
-node dist/chatgpt_login.js # Node.js required
+npx tsc # Node.js required
+node dist/chatgpt_login.js 
 ```
 
 # Step 2: Login
