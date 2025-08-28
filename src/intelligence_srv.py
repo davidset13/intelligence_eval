@@ -53,7 +53,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
             hle_dataset_mod = hle_dataset_mod[hle_dataset_mod["image"].isna()]
 
         #hle_dataset, _ = train_test_split(hle_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(hle_dataset_mod), eps = 0.1, alpha = 0.1), stratify = hle_dataset_mod["category"], random_state = None)
-        hle_dataset, _ = train_test_split(hle_dataset_mod[1000:1250], train_size = 50, stratify = hle_dataset_mod[1000:1250]["category"], random_state = None)
+        hle_dataset, _ = train_test_split(hle_dataset_mod[1750:2000], train_size = 50, stratify = hle_dataset_mod[1750:2000]["category"], random_state = None)
         hle_dataset = pd.DataFrame(hle_dataset, columns=hle_dataset_full.columns)
         async_tasks.append(hle_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", hle_dataset, hle_sys_prompt_mc, hle_sys_prompt_ex, payload.prompt_param_name, payload.image_param_name, payload.images_enabled, len(hle_dataset_mod)))
     

@@ -12,7 +12,7 @@
 [Massive Multitask Language Understanding Pro (MMLU-Pro)](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
 
 [Graduate-Level Google-Proof Q&A (GPQA)](https://huggingface.co/datasets/Idavidrein/gpqa)
-    - Note: This server uses the diamond subset of the GPQA, or GPQA-Diamond
+    - Note: This server uses the diamond subset of the GPQA
 
 [LiveBench](https://livebench.ai/#/)
 
