@@ -12,9 +12,9 @@ response = requests.post(
         }, 
         "prompt_param_name": "prompt",
         "image_param_name": "image",
-        "hle": True,
+        "hle": False,
         "hle_categories": ["all"],
-        "mmlu_pro": False, 
+        "mmlu_pro": True, 
         "mmlu_pro_categories": ["all"],
         "gpqa": False,
         "livebench": False,
@@ -55,3 +55,6 @@ def print_total_results(model: str) -> None:
     print(f"{model} Accuracy: {accuracy}")
 
 print_total_results("GPT-5-THINK")
+
+
+

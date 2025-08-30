@@ -10,6 +10,8 @@ import requests
 import copy
 from collections import defaultdict
 from eval_json_parser import parse_eval_json
+from payloads import gpt_dataset, gpt_ds_name
+import os
 
 value_counts = {
     "MAT": 1351,
@@ -38,9 +40,14 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
         correct_answer = str(row["answer"])
         category = str(row["category"])
 
-        agent_params_copy[prompt_param_name] = f"Please keep your response short and concise. Question: {question} \n\n Options: {options}"
+        agent_params_copy[prompt_param_name] = f"Please keep your response short and concise. \n\n Question: {question} \n\n Options: {options}"
         response = await asyncio.to_thread(requests.post, agent_url, json=agent_params_copy)
-        response_content = response.json()
+        
+        try:
+            response_content = response.json()
+        except:
+            response_content = response.text
+        
         if len(response_content) == 0 or response_content is None:
             return None
     except Exception as e:
@@ -53,6 +60,9 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
             return None
         else:
             correct = parse_eval_json(response_eval["content"])
+
+        gpt_dataset.loc[len(gpt_dataset)] = [question, category, response_content, correct_answer, correct]
+        logger.info(len(gpt_dataset))
         
         return correct, category
     except Exception as e:
@@ -104,5 +114,7 @@ async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: di
 
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
+
+    gpt_dataset.to_csv(os.path.join(os.getcwd(), "agent_ans", f"{gpt_ds_name}.csv"), encoding="utf-8", index=False)
 
     return resp_dict
