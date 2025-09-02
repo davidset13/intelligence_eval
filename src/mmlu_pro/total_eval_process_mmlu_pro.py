@@ -47,6 +47,9 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
             response_content = response.json()
         except:
             response_content = response.text
+
+        if isinstance(response_content, int) or isinstance(response_content, float):
+            response_content = str(response_content)
         
         if len(response_content) == 0 or response_content is None:
             return None

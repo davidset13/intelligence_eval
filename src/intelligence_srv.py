@@ -65,7 +65,7 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
                 mmlu_pro_dataset_mod = pd.concat([mmlu_pro_dataset_mod, mmlu_pro_dataset_full[mmlu_pro_dataset_full["category"] == category]])
 
         #mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_mod), eps = 0.1, alpha = 0.1), stratify = mmlu_pro_dataset_mod["category"], random_state = None)
-        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod[3000:4000], train_size = 50, stratify = mmlu_pro_dataset_mod[3000:4000]["category"], random_state = None)
+        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod[8000:9000], train_size = 50, stratify = mmlu_pro_dataset_mod[8000:9000]["category"], random_state = None)
         mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
         async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name, len(mmlu_pro_dataset_mod)))
 
