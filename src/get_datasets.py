@@ -71,6 +71,14 @@ async def main() -> None:
             ],
             "livebench_dataset"
         ),
+        (
+            [
+                "lcb_codegen = load_dataset('livecodebench/code_generation_lite', 'release_latest', version_tag='release_v6', split='test')",
+                "lcb_codegen = lcb_codegen.to_pandas()",
+                "lcb_codegen = lcb_codegen[['question_content', 'starter_code', 'public_test_cases', 'private_test_cases']]"
+            ],
+            "lcb_codegen"
+        ),
     ]
 
 
