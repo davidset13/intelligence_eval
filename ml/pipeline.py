@@ -24,7 +24,7 @@ code_results = pd.Series(dtype = str)
 logger.info("LCB Codegen Read")
 
 async def main() -> None:
-    for i in range(5):
+    for i in range(len(lcb_codegen)):
         logger.info(f"Processing Question {i}")
         question = str(lcb_codegen.loc[i, "question_content"])
         starter_code = str(lcb_codegen.loc[i, "starter_code"])
@@ -40,7 +40,7 @@ async def main() -> None:
                 {
                     "role": "user",
                     "content": f"""Question: {question}
-                                    Starter Code: {starter_code if starter_code else "No starter code provided"}
+                                    Starter Code: {starter_code if isinstance(starter_code, str) else "No starter code provided"}
                                     Public Test Cases: {public_test_cases}"""
                 }
             ]
@@ -64,8 +64,8 @@ async def main() -> None:
             continue
 
         code_results[len(code_results)] = resp["content"][9:-3]
-        logger.info(f"Code Results: {code_results[len(code_results) - 1]}")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+    code_results.to_csv(os.path.join(os.getcwd(), "utility", "code_snippets_for_ml.csv"), index=False, encoding="utf-8")
