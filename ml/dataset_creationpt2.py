@@ -15,9 +15,6 @@ if not load_dotenv(os.path.join(os.getcwd(), ".private.env")):
 
 openrouter_api_key: str= os.getenv("OPENROUTER_API_KEY") or ""
 
-crawl_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-crawl_path = os.path.join(crawl_path, "conc_web_crawler")
-
 logger.info("Reading LCB Codegen")
 lcb_codegen = pd.read_csv(os.path.join(os.getcwd(), "utility", "lcb_codegen.csv"))
 code_results = pd.Series(dtype = str)

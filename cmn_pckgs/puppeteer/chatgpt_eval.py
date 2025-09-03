@@ -54,4 +54,4 @@ def print_total_results(model: str) -> None:
     print("correct", dataset['marked_correct'].sum())
     print(f"{model} Accuracy: {accuracy}")
 
-print_total_results("GPT-4o")
+print_total_results("GPT-5-THINK")
