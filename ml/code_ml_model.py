@@ -6,6 +6,8 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import random
 
+### Purely for documentation purposes, there is no need to retrain this model
+
 ml_dataset = pd.read_csv(os.path.join(os.getcwd(), "utility", "code_detection_dataset.csv"))
 
 @dataclass
@@ -16,9 +18,8 @@ class Row:
 
 class SpanWindowDataset(Dataset):
 
-    def __init__(self, rows: list[Row], max_len: int = 2048):
+    def __init__(self, rows: list[Row]):
         self.rows = rows
-        self.max_len = max_len
     
     def __len__(self) -> int:
         return len(self.rows)
@@ -82,16 +83,16 @@ class CodeMLModel(nn.Module):
 def span_loss(start_logits: torch.Tensor, end_logits: torch.Tensor, start_positions: torch.Tensor, end_positions: torch.Tensor):
     
     B, T = start_logits.shape
-    loss_f = nn.CrossEntropyLoss(ignore_index = -100)
+    loss_f = nn.CrossEntropyLoss(reduction="mean", ignore_index = -100)
     loss_s = loss_f(start_logits, start_positions)
     loss_e = loss_f(end_logits, end_positions)
     return (loss_s + loss_e) / 2
 
 
-def train_model(train_rows: list[Row], val_rows: list[Row], max_len=2048, epochs=3, device="cuda"):
+def train_model(train_rows: list[Row], val_rows: list[Row], epochs=3, device="cuda"):
     
-    train_ds = SpanWindowDataset(train_rows, max_len=max_len)
-    val_ds   = SpanWindowDataset(val_rows, max_len=max_len)
+    train_ds = SpanWindowDataset(train_rows)
+    val_ds   = SpanWindowDataset(val_rows)
 
     train_dl = DataLoader(train_ds, batch_size=8, shuffle=True, collate_fn=collate_pad, num_workers=2)
     val_dl   = DataLoader(val_ds, batch_size=8, shuffle=False, collate_fn=collate_pad, num_workers=2)
@@ -138,7 +139,7 @@ def train_model(train_rows: list[Row], val_rows: list[Row], max_len=2048, epochs
                     em_rate = em / max(1, len(val_ds))
                     mean_iou = iou / max(1, n)
         
-        print(f"Epoch {epoch}: train_loss={avg:.4f}  val_EM={em_rate:.3f}  val_IoU={mean_iou:.3f}")
+        print(f"Epoch {epoch+1}: train_loss={avg:.4f}  val_EM={em_rate:.3f}  val_IoU={mean_iou:.3f}")
 
     return model
 
@@ -154,7 +155,7 @@ def main():
     val_samples = samples[n_train:n_train+n_val]
     test_samples = samples[n_train+n_val:]
 
-    model = train_model(train_samples, val_samples, max_len=2048, epochs=3, device="cpu")
+    model = train_model(train_samples, val_samples, epochs=30, device="cuda")
 
 if __name__ == "__main__":
     main()

@@ -23,10 +23,21 @@ def main() -> None:
     for i in range(len(text_dataset)):
         logger.info(f"Processing {i+1} of {len(text_dataset)}")
         try:
-            random_index = random.randint(0, len(str(text_dataset.loc[i, "text"])) - 1)
+            total_text_len = len(str(text_dataset.loc[i, "text"]))
+            random_start_idx = int(random.uniform(0, 1) * min(total_text_len / 2, 2048))
+            random_end_idx = int(random.uniform(0, 1) * min(total_text_len / 2, 2048))
+
             random_code_snippet_idx = random.randint(0, len(code_dataset) - 1)
             random_code_snippet = code_dataset[random_code_snippet_idx].strip()
-            final_dataset.loc[len(final_dataset)] = [f"{str(text_dataset.loc[i, 'text'])[:random_index]}{random_code_snippet}{str(text_dataset.loc[i, 'text'])[random_index:]}", random_index, random_index + len(random_code_snippet)]
+            
+            final_str = (
+                f"{str(text_dataset.loc[i, 'text'])[:random_start_idx]}"
+                f"{random_code_snippet}"
+                f"{str(text_dataset.loc[i, 'text'])[total_text_len//2: total_text_len//2 + random_end_idx]}"
+            )
+
+            final_dataset.loc[len(final_dataset)] = [final_str, random_start_idx, random_start_idx + len(random_code_snippet)]
+
         except Exception as e:
             logger.error(f"Error Processing {i+1}: {e}")
             continue
