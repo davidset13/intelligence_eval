@@ -19,8 +19,14 @@ dependencies = [
     "sympy>=1.14.0",
     "scikit-learn>=1.7.1",
     "numpy>=2.3.1",
-    "datasets>=4.0.0",
+    "datasets<=3.6.0",
     "httpx>=0.28.1",
     "colorlog>=6.9.0",
+    "transformers>=4.56.0",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
 ]
-
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true

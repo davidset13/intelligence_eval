@@ -11,6 +11,7 @@ import copy
 import random
 from eval_json_parser import parse_eval_json
 
+
 async def init_call_gpqa(openrouter_key: str, agent_url: str, agent_params: dict[Any, Any], logger: Logger, model_eval: str, row: pd.Series, prompt_param_name: Any) -> bool | None:
     try:
         agent_params_copy = copy.deepcopy(agent_params)
@@ -35,6 +36,9 @@ async def init_call_gpqa(openrouter_key: str, agent_url: str, agent_params: dict
             response_content = response.json()
         except:
             response_content = response.text
+        
+        if isinstance(response_content, int) or isinstance(response_content, float):
+            response_content = str(response_content)
 
         if len(response_content) == 0 or response_content is None:
             return None

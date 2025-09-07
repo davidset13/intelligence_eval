@@ -10,6 +10,8 @@ import requests
 import copy
 from collections import defaultdict
 from eval_json_parser import parse_eval_json, eval_livebench_if
+from payloads import gpt_dataset, gpt_ds_name
+import os
 
 value_counts = {
     "INS": 200,
@@ -55,9 +57,11 @@ async def init_call_livebench(openrouter_key: str, agent_url: str, agent_params:
         else:
             if category != "INS":
                 correct = parse_eval_json(response_eval["content"])
+                gpt_dataset.loc[len(gpt_dataset)] = [row["turns"], category, response_content, row["ground_truth"], correct]
                 return correct, category
             else:
                 correct = eval_livebench_if(response_eval["content"])
+                gpt_dataset.loc[len(gpt_dataset)] = [row["turns"], category, response_content, row["task_prompt"], correct]
                 return correct, category
     except Exception as e:
         logger.error(f"Error Evaluating Agent: {e}")
@@ -110,5 +114,7 @@ async def livebench_scoring(openrouter_key: str, agent_url: str, agent_params: d
 
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
+
+    gpt_dataset.to_csv(os.path.join(os.getcwd(), "agent_ans", f"{gpt_ds_name}.csv"), encoding="utf-8", index=False)
 
     return resp_dict

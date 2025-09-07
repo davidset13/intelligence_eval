@@ -10,8 +10,6 @@ import requests
 import copy
 from collections import defaultdict
 from eval_json_parser import parse_eval_json
-from payloads import gpt_dataset, gpt_ds_name
-import os
 
 value_counts = {
     "MAT": 1351,
@@ -63,9 +61,6 @@ async def init_call_mmlu_pro(openrouter_key: str, agent_url: str, agent_params: 
             return None
         else:
             correct = parse_eval_json(response_eval["content"])
-
-        gpt_dataset.loc[len(gpt_dataset)] = [question, category, response_content, correct_answer, correct]
-        logger.info(len(gpt_dataset))
         
         return correct, category
     except Exception as e:
@@ -117,7 +112,5 @@ async def mmlu_pro_scoring(openrouter_key: str, agent_url: str, agent_params: di
 
     time_end = time.time()
     logger.info(f"Time taken: {time_end - time_start} seconds")
-
-    gpt_dataset.to_csv(os.path.join(os.getcwd(), "agent_ans", f"{gpt_ds_name}.csv"), encoding="utf-8", index=False)
 
     return resp_dict

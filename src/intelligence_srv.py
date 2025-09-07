@@ -64,13 +64,12 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
             for category in payload.mmlu_pro_categories:
                 mmlu_pro_dataset_mod = pd.concat([mmlu_pro_dataset_mod, mmlu_pro_dataset_full[mmlu_pro_dataset_full["category"] == category]])
 
-        #mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_mod), eps = 0.1, alpha = 0.1), stratify = mmlu_pro_dataset_mod["category"], random_state = None)
-        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod[11000:], train_size = 50, stratify = mmlu_pro_dataset_mod[11000:]["category"], random_state = None)
+        mmlu_pro_dataset, _ = train_test_split(mmlu_pro_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(mmlu_pro_dataset_mod), eps = 0.04), stratify = mmlu_pro_dataset_mod["category"], random_state = None)
         mmlu_pro_dataset = pd.DataFrame(mmlu_pro_dataset, columns=mmlu_pro_dataset_full.columns)
         async_tasks.append(mmlu_pro_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", mmlu_pro_dataset, payload.prompt_param_name, len(mmlu_pro_dataset_mod)))
 
     if payload.gpqa:
-        gpqa_dataset, _ = train_test_split(gpqa_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(gpqa_dataset_full), eps = 0.1, alpha = 0.1), random_state = None)
+        gpqa_dataset, _ = train_test_split(gpqa_dataset_full, train_size = min_sample_size_safe_mle_wald("bernoulli", len(gpqa_dataset_full), eps = 0.04), random_state = None)
         gpqa_dataset = pd.DataFrame(gpqa_dataset, columns=gpqa_dataset_full.columns)
         async_tasks.append(gpqa_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", gpqa_dataset, payload.prompt_param_name, len(gpqa_dataset_full)))
 
@@ -82,7 +81,8 @@ async def general_llm_eval(payload: IntelligenceEvalInput):
             for category in payload.livebench_categories:
                 livebench_dataset_mod = pd.concat([livebench_dataset_mod, livebench_dataset_full[livebench_dataset_full["category"] == category]])
 
-        livebench_dataset, _ = train_test_split(livebench_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(livebench_dataset_mod), eps = 0.1, alpha = 0.1), stratify = livebench_dataset_mod["category"], random_state = None)
+        #livebench_dataset, _ = train_test_split(livebench_dataset_mod, train_size = min_sample_size_safe_mle_wald("bernoulli", len(livebench_dataset_mod), eps = 0.04), stratify = livebench_dataset_mod["category"], random_state = None)
+        livebench_dataset, _ = train_test_split(livebench_dataset_mod[0:106], train_size = 50, stratify = livebench_dataset_mod[0:106]["category"], random_state = None)
         livebench_dataset = pd.DataFrame(livebench_dataset, columns=livebench_dataset_full.columns)
         async_tasks.append(livebench_scoring(openrouter_api_key, payload.agent_url, payload.agent_params, logger, "google/gemini-flash-1.5-8b", livebench_dataset, payload.prompt_param_name, len(livebench_dataset_mod)))
     

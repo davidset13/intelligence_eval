@@ -14,10 +14,10 @@ response = requests.post(
         "image_param_name": "image",
         "hle": False,
         "hle_categories": ["all"],
-        "mmlu_pro": True, 
+        "mmlu_pro": False, 
         "mmlu_pro_categories": ["all"],
         "gpqa": False,
-        "livebench": False,
+        "livebench": True,
         "livebench_categories": ["all"],
         "images_enabled": False
     }
@@ -54,4 +54,4 @@ def print_total_results(model: str) -> None:
     print("correct", dataset['marked_correct'].sum())
     print(f"{model} Accuracy: {accuracy}")
 
-print_total_results("GPT-5-THINK")
+print_total_results("GPT-5-FAST")
